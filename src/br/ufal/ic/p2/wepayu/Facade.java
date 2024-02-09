@@ -3,13 +3,20 @@ package br.ufal.ic.p2.wepayu;
 import br.ufal.ic.p2.wepayu.Exception.InputCheck;
 import br.ufal.ic.p2.wepayu.models.*;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 
 public class Facade {
 
+    public Facade() throws FileNotFoundException {
+        try {
+            Sistema.getFromXML();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException();
+        }
+    }
     public String criarEmpregado(String nome, String endereco, String tipo, String salario) throws Exception {
 
         //  Verifica os parametros para possiveis erros.
@@ -231,12 +238,15 @@ public class Facade {
         }
     }
 
-    public void zerarSistema() {
-        Sistema.empregados = new HashMap<String, Empregado>();
+    public void zerarSistema() throws IOException {
+        Sistema.clearXML();
+
+        Sistema.empregados = new HashMap<>();
         Sistema.tamanho = 0;
     }
 
-    public void encerrarSistema() {
+    public void encerrarSistema() throws IOException {
+        Sistema.saveToXML();
     }
 
 }

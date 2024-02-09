@@ -1,8 +1,12 @@
 package br.ufal.ic.p2.wepayu;
 
-import br.ufal.ic.p2.wepayu.Exception.InputCheck;
 import br.ufal.ic.p2.wepayu.models.*;
 
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -15,28 +19,50 @@ public class Sistema {
     public static Integer tamanho;
 
     public Sistema() {
-        empregados = new HashMap<String, Empregado>();
+        empregados = new HashMap<>();
         tamanho = 0;
     }
 
+    public static void saveToXML() throws IOException {
+        Files.createFile(Path.of("data.xml"));
+        BufferedOutputStream file = new BufferedOutputStream(new FileOutputStream("data.xml"));
+
+        XMLEncoder e = new XMLEncoder(file);
+        e.writeObject(empregados);
+        e.writeObject(tamanho);
+        e.close();
+    }
+
+    public static void getFromXML() throws FileNotFoundException {
+
+        BufferedInputStream file = new BufferedInputStream(new FileInputStream("data.xml"));
+
+        XMLDecoder d = new XMLDecoder(file);
+        empregados =  (HashMap<String, Empregado>) d.readObject();
+        tamanho = (Integer) d.readObject();
+    }
+
+    public static void clearXML() throws IOException {
+        Files.delete(Path.of("data.xml"));
+    }
 
     public static Object getEmployeeAttribute(String employeeID, String attribute) throws Exception {
 
         Empregado employee = empregados.get(employeeID);
 
         return switch (attribute) {
-            case "nome" -> employee.getNome();
-            case "endereco" -> employee.getEndereco();
-            case "tipo" -> employee.getTipo();
-            case "salario" -> employee.getSalario();
-            case "comissao" -> ((EmpregadoComissionado) employee).getComissao();
-            case "sindicalizado" -> employee.getSindicalizado();
-            case "metodoPagamento" -> employee.getMetodo();
-            case "banco" -> ((Banco) employee.getMetodoPagamento()).getBanco();
-            case "agencia" -> ((Banco) employee.getMetodoPagamento()).getAgencia();
-            case "contaCorrente" -> ((Banco) employee.getMetodoPagamento()).getContaCorrente();
-            case "idSindicato" -> employee.membroSindicado.getIdMembro();
-            case "taxaSindical" -> employee.membroSindicado.getTaxaSindical();
+            case "nome"             -> employee.getNome();
+            case "endereco"         -> employee.getEndereco();
+            case "tipo"             -> employee.getTipo();
+            case "salario"          -> employee.getSalario();
+            case "comissao"         -> ((EmpregadoComissionado) employee).getComissao();
+            case "sindicalizado"    -> employee.getSindicalizado();
+            case "metodoPagamento"  -> employee.getMetodo();
+            case "banco"            -> ((Banco) employee.getMetodoPagamento()).getBanco();
+            case "agencia"          -> ((Banco) employee.getMetodoPagamento()).getAgencia();
+            case "contaCorrente"    -> ((Banco) employee.getMetodoPagamento()).getContaCorrente();
+            case "idSindicato"      -> employee.membroSindicado.getIdMembro();
+            case "taxaSindical"     -> employee.membroSindicado.getTaxaSindical();
 
             default -> throw new Exception("Atributo nao existe.");
 

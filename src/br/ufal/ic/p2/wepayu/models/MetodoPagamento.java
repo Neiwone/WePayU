@@ -1,5 +1,5 @@
 package br.ufal.ic.p2.wepayu.models;
-
-public class MetodoPagamento {
+import java.io.Serializable;
+public class MetodoPagamento  implements Serializable{
 
 }

@@ -1,10 +1,12 @@
 package br.ufal.ic.p2.wepayu.models;
-
-public class EmpregadoAssalariado extends Empregado{
+import java.io.Serializable;
+public class EmpregadoAssalariado extends Empregado implements Serializable {
 
     private String salarioMensal;
 
-
+    public String getSalarioMensal() {
+        return salarioMensal;
+    }
 
     public EmpregadoAssalariado(String nome, String endereco, String salario) {
         super(nome, endereco);

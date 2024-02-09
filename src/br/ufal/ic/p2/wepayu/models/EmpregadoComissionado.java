@@ -1,11 +1,23 @@
 package br.ufal.ic.p2.wepayu.models;
-
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class EmpregadoComissionado extends Empregado{
+public class EmpregadoComissionado extends Empregado implements Serializable {
     protected String salarioMensal;
 
     protected String comissao;
+
+    public String getSalarioMensal() {
+        return salarioMensal;
+    }
+
+    public ArrayList<ResultadoDeVenda> getVendas() {
+        return vendas;
+    }
+
+    public void setVendas(ArrayList<ResultadoDeVenda> vendas) {
+        this.vendas = vendas;
+    }
 
     public ArrayList<ResultadoDeVenda> vendas;
 

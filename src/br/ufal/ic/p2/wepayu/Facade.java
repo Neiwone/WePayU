@@ -249,4 +249,9 @@ public class Facade {
         Sistema.saveToXML();
     }
 
+    public static void main(String[] args) throws FileNotFoundException {
+        Facade facade = new Facade();
+        Sistema.empregados.forEach((id, empregado) -> System.out.println(empregado + " " + id));
+    }
+
 }

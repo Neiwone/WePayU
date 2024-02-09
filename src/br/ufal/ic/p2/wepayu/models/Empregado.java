@@ -1,8 +1,18 @@
 package br.ufal.ic.p2.wepayu.models;
 
-public abstract class Empregado {
+import java.io.Serializable;
+
+public abstract class Empregado implements Serializable {
     protected String nome;
     protected String endereco;
+
+    public MembroSindicado getMembroSindicado() {
+        return membroSindicado;
+    }
+
+    public void setMembroSindicado(MembroSindicado membroSindicado) {
+        this.membroSindicado = membroSindicado;
+    }
 
     public String getMetodo() {
         if(metodoPagamento instanceof EmMaos)

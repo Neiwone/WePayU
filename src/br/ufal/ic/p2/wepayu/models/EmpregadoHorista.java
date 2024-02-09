@@ -1,11 +1,22 @@
 package br.ufal.ic.p2.wepayu.models;
-
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class EmpregadoHorista extends Empregado{
+public class EmpregadoHorista extends Empregado implements Serializable {
     protected String salarioPorHora;
     public ArrayList<CartaoDePonto> cartao;
 
+    public String getSalarioPorHora() {
+        return salarioPorHora;
+    }
+
+    public ArrayList<CartaoDePonto> getCartao() {
+        return cartao;
+    }
+
+    public void setCartao(ArrayList<CartaoDePonto> cartao) {
+        this.cartao = cartao;
+    }
 
     public void setSalarioPorHora(String salarioPorHora) {
         this.salarioPorHora = salarioPorHora;

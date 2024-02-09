@@ -1,4 +1,6 @@
 package br.ufal.ic.p2.wepayu.models;
 
-public class Correios extends MetodoPagamento {
+import java.io.Serializable;
+
+public class Correios extends MetodoPagamento implements Serializable {
 }

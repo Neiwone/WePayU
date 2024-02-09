@@ -111,7 +111,6 @@ public class InputCheck extends Exception{
         checkEmployeeID(employeeID);
     }
 
-
     public static void addTimecard(String employeeID, String hours) throws Exception {
 
         checkEmployeeID(employeeID);
@@ -134,7 +133,6 @@ public class InputCheck extends Exception{
         if(!(Sistema.empregados.get(employeeID) instanceof EmpregadoComissionado))
             throw new Exception("Empregado nao eh comissionado.");
     }
-
 
     public static void getWorkedHours(String employeeID, String initialDate, String finalDate) throws Exception {
 
@@ -244,6 +242,8 @@ public class InputCheck extends Exception{
         }
         if(day > 28 && month == 2)
             throw new Exception("Data final invalida.");
+        if(day > 31 || month > 12)
+            throw new Exception("Data final invalida.");
 
         i = 0;
         day = 0;
@@ -261,6 +261,8 @@ public class InputCheck extends Exception{
         }
 
         if(day > 28 && month == 2)
+            throw new Exception("Data inicial invalida.");
+        if(day > 31 || month > 12)
             throw new Exception("Data inicial invalida.");
     }
 

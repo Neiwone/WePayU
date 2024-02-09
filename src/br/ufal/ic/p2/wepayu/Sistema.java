@@ -87,7 +87,6 @@ public class Sistema {
         return Integer.toString((int) horasAcumuladas);
     }
 
-
     public static String getExtraWorkedHours(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
 
         if (initialDate.isAfter(finalDate))
@@ -105,6 +104,107 @@ public class Sistema {
         if((int) horasAcumuladas == horasAcumuladas) return Integer.toString((int) horasAcumuladas);
         return Double.toString(horasAcumuladas).replace(".", ",");
     }
+
+    public static String getSales(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
+
+        if (initialDate.isAfter(finalDate))
+            throw new Exception("Data inicial nao pode ser posterior aa data final.");
+
+        Empregado employee = empregados.get(employeeID);
+
+        double valorTotal = 0.0;
+        for(ResultadoDeVenda venda :((EmpregadoComissionado) employee).vendas) {
+            if ((venda.getData().isAfter(initialDate) || venda.getData().isEqual(initialDate)) && venda.getData().isBefore(finalDate))
+                valorTotal += venda.getValor();
+        }
+
+        return String.format("%.2f", valorTotal).replace(".", ",");
+    }
+
+    public static String getTotalPriceForTaxes(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
+
+        if (initialDate.isAfter(finalDate))
+            throw new Exception("Data inicial nao pode ser posterior aa data final.");
+
+        Empregado employee = empregados.get(employeeID);
+
+        double taxaTotal = 0.0;
+        for(TaxaServico venda : employee.membroSindicado.taxa) {
+            if ((venda.getData().isAfter(initialDate) || venda.getData().isEqual(initialDate)) && venda.getData().isBefore(finalDate)) {
+                taxaTotal += venda.getValor();
+            }
+        }
+
+        return String.format("%.2f", taxaTotal).replace(".", ",");
+    }
+
+    public static void changeAttribute(String employeeID, String attribute, String value) throws Exception {
+
+        Empregado employee = Sistema.empregados.get(employeeID);
+
+        switch (attribute) {
+            case "nome" -> employee.setNome(value);
+            case "endereco" -> employee.setEndereco(value);
+            case "tipo" -> {
+                if (value.equals("horista"))
+                    changeEmployeeTypeToHorista(employeeID);
+                if (value.equals("comissionado"))
+                    changeEmployeeTypeToComissionado(employeeID);
+                if (value.equals("assalariado"))
+                    changeEmployeeTypeToAssalariado(employeeID);
+            }
+            case "salario" -> {
+                if (employee instanceof EmpregadoAssalariado)
+                    ((EmpregadoAssalariado) employee).setSalarioMensal(value);
+                else if (employee instanceof EmpregadoHorista)
+                    ((EmpregadoHorista) employee).setSalarioPorHora(value);
+                else if (employee instanceof EmpregadoComissionado)
+                    ((EmpregadoComissionado) employee).setSalarioMensal(value);
+            }
+            case "sindicalizado" -> {
+                if (!Boolean.valueOf(value))
+                    employee.membroSindicado = null;
+            }
+            case "comissao" -> ((EmpregadoComissionado) employee).setComissao(value);
+            case "metodoPagamento" -> {
+                MetodoPagamento novoMetodo = employee.getMetodoPagamento();
+                if (value.equals("correios"))
+                    novoMetodo = new Correios();
+                if (value.equals("emMaos"))
+                    novoMetodo = new EmMaos();
+
+                employee.setMetodoPagamento(novoMetodo);
+            }
+            default -> throw new Exception("Atributo nao existe.");
+        }
+    }
+
+    public static boolean doesThisIDExists(String idSindicato) {
+        for(Map.Entry<String, Empregado> entry: Sistema.empregados.entrySet()) {
+            Empregado empregado = entry.getValue();
+            if (empregado.getSindicalizado()) {
+                if (empregado.membroSindicado.getIdMembro().equals(idSindicato))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     public static void changeEmployeeTypeToHorista(String employeeID, String salary) throws Exception {

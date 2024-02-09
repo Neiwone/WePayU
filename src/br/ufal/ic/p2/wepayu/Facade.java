@@ -141,25 +141,15 @@ public class Facade {
     }
     public String getVendasRealizadas(String emp, String dataInicial, String dataFinal) throws Exception {
 
-        // Check dos parametros para possiveis erros.
+        //  Check dos parametros para possiveis erros.
         InputCheck.getSales(emp, dataInicial, dataFinal);
 
-        Empregado empregado = Sistema.empregados.get(emp);
-
-        LocalDate initDate = Sistema.getLocalDate(dataInicial);
-        // oi
+        //  Define a data inicial e a data final.
+        LocalDate initialDate = Sistema.getLocalDate(dataInicial);
         LocalDate finalDate = Sistema.getLocalDate(dataFinal);
 
-        if (initDate.isAfter(finalDate))
-            throw new Exception("Data inicial nao pode ser posterior aa data final.");
-
-        double valorTotal = 0.0;
-        for(ResultadoDeVenda venda :((EmpregadoComissionado) empregado).vendas) {
-            if ((venda.getData().isAfter(initDate) || venda.getData().isEqual(initDate)) && venda.getData().isBefore(finalDate)) {
-                    valorTotal += venda.getValor();
-            }
-        }
-        return String.format("%.2f", valorTotal).replace(".", ",");
+        //  Retorna o valor total das vendas realizadas pelo empregado naquele intervalo de tempo.
+        return Sistema.getSales(emp, initialDate, finalDate);
 
     }
     public String getTaxasServico (String emp, String dataInicial , String dataFinal) throws Exception {
@@ -167,33 +157,12 @@ public class Facade {
         // Check dos parametros para possiveis erros.
         InputCheck.getTaxService(emp, dataInicial, dataFinal);
 
-        Empregado empregado = Sistema.empregados.get(emp);
+        //  Define a data inicial e a data final.
+        LocalDate initialDate = Sistema.getLocalDate(dataInicial);
+        LocalDate finalDate = Sistema.getLocalDate(dataFinal);
 
-        LocalDate initDate;
-        try {
-           initDate = LocalDate.parse(dataInicial, DateTimeFormatter.ofPattern("d/M/yyyy"));
-        } catch (DateTimeParseException e) {
-           throw new Exception("Data inicial invalida.");
-        }
-
-        LocalDate finalDate;
-        try {
-           finalDate = LocalDate.parse(dataFinal, DateTimeFormatter.ofPattern("d/M/yyyy"));
-        } catch (DateTimeParseException e) {
-           throw new Exception("Data final invalida.");
-        }
-
-        if (initDate.isAfter(finalDate))
-           throw new Exception("Data inicial nao pode ser posterior aa data final.");
-
-        double taxaTotal = 0.0;
-        for(TaxaServico venda : empregado.membroSindicado.taxa) {
-           if ((venda.getData().isAfter(initDate) || venda.getData().isEqual(initDate)) && venda.getData().isBefore(finalDate)) {
-               taxaTotal += venda.getValor();
-           }
-        }
-
-        return String.format("%.2f", taxaTotal).replace(".", ",");
+        //  Retorna o valor de todas as taxas daquele membro do sindicato naquele intervalo de tempo.
+        return Sistema.getTotalPriceForTaxes(emp, initialDate, finalDate);
 
    }
     public void lancaTaxaServico (String membro, String data, String valor) throws Exception {
@@ -206,13 +175,11 @@ public class Facade {
 
             if (empregado.membroSindicado != null) {
                 if (Objects.equals(empregado.membroSindicado.idMembro, membro)) {
-                    try {
-                        LocalDate date = LocalDate.parse(data, DateTimeFormatter.ofPattern("d/M/yyyy"));
-                        empregado.membroSindicado.taxa.add(new TaxaServico(date, Double.parseDouble(valor.replace(",", "."))));
-                        return;
-                    } catch (DateTimeParseException e) {
-                        throw new Exception("Data invalida.");
-                    }
+                    empregado.membroSindicado.taxa.add(new TaxaServico(
+                            Sistema.getLocalDate(data),
+                            Double.parseDouble(valor.replace(",", ".")))
+                    );
+                    return;
                 }
             }
         }
@@ -225,57 +192,15 @@ public class Facade {
         // Check dos parametros para possiveis erros.
         InputCheck.changeEmployeeInfo(emp, atributo, valor1, null, null, null);
 
-        switch (atributo) {
-            case "nome" -> Sistema.empregados.get(emp).setNome(valor1);
-            case "endereco" -> Sistema.empregados.get(emp).setEndereco(valor1);
-            case "tipo" -> {
-                if(valor1.equals("horista"))
-                    Sistema.changeEmployeeTypeToHorista(emp);
-                if(valor1.equals("comissionado"))
-                    Sistema.changeEmployeeTypeToComissionado(emp);
-                if(valor1.equals("assalariado"))
-                    Sistema.changeEmployeeTypeToAssalariado(emp);
-            }
-            case "salario" -> {
-                if(Sistema.empregados.get(emp) instanceof EmpregadoAssalariado)
-                    ((EmpregadoAssalariado) Sistema.empregados.get(emp)).setSalarioMensal(valor1);
-                else if(Sistema.empregados.get(emp) instanceof EmpregadoHorista)
-                    ((EmpregadoHorista) Sistema.empregados.get(emp)).setSalarioPorHora(valor1);
-                else if (Sistema.empregados.get(emp) instanceof EmpregadoComissionado)
-                    ((EmpregadoComissionado) Sistema.empregados.get(emp)).setSalarioMensal(valor1);
-            }
-            case "sindicalizado" -> {
-                if(!Boolean.valueOf(valor1))
-                    Sistema.empregados.get(emp).membroSindicado = null;
-            }
-            case "comissao" -> ((EmpregadoComissionado) Sistema.empregados.get(emp)).setComissao(valor1);
-            case "metodoPagamento" -> {
-                MetodoPagamento novoMetodo = Sistema.empregados.get(emp).getMetodoPagamento();
-                if(valor1.equals("correios"))
-                    novoMetodo = new Correios();
-                if(valor1.equals("emMaos"))
-                    novoMetodo = new EmMaos();
-                Sistema.empregados.get(emp).setMetodoPagamento(novoMetodo);
-            }
-            default -> throw new Exception("Atributo nao existe.");
-        }
-    }
-    public boolean idSindicadoExiste(String idSindicato) {
-        for(Map.Entry<String, Empregado> entry: Sistema.empregados.entrySet()) {
-            Empregado empregado = entry.getValue();
-            if (empregado.getSindicalizado()) {
-                if (empregado.membroSindicado.getIdMembro().equals(idSindicato))
-                    return true;
-            }
-        }
-        return false;
+        // Muda o atributo do empregado para o valor1.
+        Sistema.changeAttribute(emp, atributo, valor1);
     }
     public void alteraEmpregado(String emp, String atributo, String valor1, String idSindicato, String taxaSindical) throws Exception {
 
         InputCheck.changeEmployeeInfo(emp, atributo, valor1, idSindicato, taxaSindical, null);
 
         if(atributo.equals("sindicalizado") && valor1.equals("true")) {
-            if (idSindicadoExiste(idSindicato))
+            if (Sistema.doesThisIDExists(idSindicato))
                 throw new Exception("Ha outro empregado com esta identificacao de sindicato");
             else {
                 Sistema.empregados.get(emp).membroSindicado = new MembroSindicado();
@@ -291,13 +216,10 @@ public class Facade {
         if(atributo.equals("metodoPagamento") && valor1.equals("banco"))
             Sistema.empregados.get(emp).setMetodoPagamento(new Banco(banco, agencia, contaCorrente));
 
-
     }
     public void alteraEmpregado(String emp, String atributo, String valor, String comissao) throws Exception {
 
         InputCheck.changeEmployeeInfo(emp, atributo, valor, comissao, null, null);
-
-        Empregado employee = Sistema.empregados.get(emp);
 
         if (atributo.equals("tipo")) {
             switch (valor) {
@@ -308,8 +230,6 @@ public class Facade {
             }
         }
     }
-
-
 
     public void zerarSistema() {
         Sistema.empregados = new HashMap<String, Empregado>();

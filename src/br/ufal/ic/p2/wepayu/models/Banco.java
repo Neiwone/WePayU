@@ -13,6 +13,9 @@ public class Banco extends MetodoPagamento  implements Serializable {
         this.contaCorrente = contaCorrente;
     }
 
+    public Banco() {
+    }
+
     public void setBanco(String banco) {
         this.banco = banco;
     }

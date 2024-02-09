@@ -4,14 +4,14 @@ import java.util.ArrayList;
 
 public class MembroSindicado implements Serializable {
     public String idMembro;
-    public String taxaSindical;
+    public Double taxaSindical;
     public ArrayList<TaxaServico> taxa;
 
     public void setIdMembro(String idMembro) {
         this.idMembro = idMembro;
     }
 
-    public void setTaxaSindical(String taxaSindical) {
+    public void setTaxaSindical(Double taxaSindical) {
         this.taxaSindical = taxaSindical;
     }
 
@@ -31,7 +31,7 @@ public class MembroSindicado implements Serializable {
         return idMembro;
     }
 
-    public String getTaxaSindical() {
-        return String.format("%.2f", Double.parseDouble(taxaSindical)).replace(".", ",");
+    public Double getTaxaSindical() {
+        return this.taxaSindical;
     }
 }

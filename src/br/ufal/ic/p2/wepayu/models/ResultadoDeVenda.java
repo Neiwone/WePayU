@@ -1,17 +1,18 @@
 package br.ufal.ic.p2.wepayu.models;
-
-import java.time.LocalDate;
 import java.io.Serializable;
 public class ResultadoDeVenda implements Serializable {
-    public LocalDate data;
-    public Double valor;
+    private String data;
+    private Double valor;
 
-    public ResultadoDeVenda(LocalDate data, Double valor) {
+    public ResultadoDeVenda(String data, Double valor) {
         this.data = data;
         this.valor = valor;
     }
 
-    public void setData(LocalDate data) {
+    public ResultadoDeVenda() {
+    }
+
+    public void setData(String data) {
         this.data = data;
     }
 
@@ -19,11 +20,11 @@ public class ResultadoDeVenda implements Serializable {
         this.valor = valor;
     }
 
-    public LocalDate getData() {
-        return data;
+    public String getData() {
+        return this.data;
     }
 
-    public double getValor() {
+    public Double getValor() {
         return valor;
     }
 }

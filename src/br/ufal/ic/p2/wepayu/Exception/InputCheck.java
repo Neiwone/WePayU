@@ -111,9 +111,11 @@ public class InputCheck extends Exception{
         checkEmployeeID(employeeID);
     }
 
-    public static void addTimecard(String employeeID, String hours) throws Exception {
+    public static void addTimecard(String employeeID, String data, String hours) throws Exception {
 
         checkEmployeeID(employeeID);
+
+        LocalDate date = Sistema.getLocalDate(data);
 
         if(hours.contains("-") || Double.parseDouble(hours.replace(",", ".")) == 0)
             throw new Exception("Horas devem ser positivas.");
@@ -123,9 +125,11 @@ public class InputCheck extends Exception{
 
     }
 
-    public static void addSaleRecord(String employeeID, String value) throws Exception {
+    public static void addSaleRecord(String employeeID, String data, String value) throws Exception {
 
         checkEmployeeID(employeeID);
+
+        LocalDate date = Sistema.getLocalDate(data);
 
         if(value.contains("-") || Double.parseDouble(value.replace(",", ".")) == 0)
             throw new Exception("Valor deve ser positivo.");
@@ -267,7 +271,9 @@ public class InputCheck extends Exception{
     }
 
 
-    public static void addTaxService(String SyndicateMemberID, String value) throws Exception {
+    public static void addTaxService(String SyndicateMemberID, String data, String value) throws Exception {
+
+        LocalDate date = Sistema.getLocalDate(data);
 
         if (SyndicateMemberID.isEmpty())
             throw new Exception("Identificacao do membro nao pode ser nula.");

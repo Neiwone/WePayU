@@ -91,11 +91,11 @@ public class Facade {
     public void lancaCartao(String emp, String data, String horas) throws Exception {
 
         //  Verifica os parametros para possiveis erros.
-        InputCheck.addTimecard(emp, horas);
+        InputCheck.addTimecard(emp, data, horas);
 
         //  Cria novo cartão de ponto com os parametros do metodo.
         CartaoDePonto novoPonto = new CartaoDePonto(
-                Sistema.getLocalDate(data),
+                data,
                 Double.parseDouble(horas.replace(",", ".")));
 
         //  Salva instancia do empregado identificado pela chave "emp".
@@ -133,11 +133,11 @@ public class Facade {
     public void lancaVenda(String emp, String data, String valor) throws Exception {
 
         //  Verifica os parametros para possiveis erros.
-        InputCheck.addSaleRecord(emp, valor);
+        InputCheck.addSaleRecord(emp, data, valor);
 
         //  Cria o novo Registro de venda.
         ResultadoDeVenda novaVenda =  new ResultadoDeVenda(
-                Sistema.getLocalDate(data),
+                data,
                 Double.parseDouble(valor.replace(",", "."))
         );
 
@@ -175,7 +175,7 @@ public class Facade {
     public void lancaTaxaServico (String membro, String data, String valor) throws Exception {
 
         // Check dos parametros para possiveis erros.
-        InputCheck.addTaxService(membro, valor);
+        InputCheck.addTaxService(membro, data, valor);
 
         for (Map.Entry<String, Empregado> entry: Sistema.empregados.entrySet()) {
             Empregado empregado = entry.getValue();
@@ -183,7 +183,7 @@ public class Facade {
             if (empregado.membroSindicado != null) {
                 if (Objects.equals(empregado.membroSindicado.idMembro, membro)) {
                     empregado.membroSindicado.taxa.add(new TaxaServico(
-                            Sistema.getLocalDate(data),
+                            data,
                             Double.parseDouble(valor.replace(",", ".")))
                     );
                     return;
@@ -212,7 +212,7 @@ public class Facade {
             else {
                 Sistema.empregados.get(emp).membroSindicado = new MembroSindicado();
                 Sistema.empregados.get(emp).membroSindicado.idMembro = idSindicato;
-                Sistema.empregados.get(emp).membroSindicado.taxaSindical = taxaSindical;
+                Sistema.empregados.get(emp).membroSindicado.taxaSindical = Double.valueOf(taxaSindical);
             }
         }
     }

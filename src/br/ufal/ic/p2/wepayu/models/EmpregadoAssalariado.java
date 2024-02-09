@@ -4,6 +4,9 @@ public class EmpregadoAssalariado extends Empregado implements Serializable {
 
     private String salarioMensal;
 
+    public EmpregadoAssalariado() {
+    }
+
     public String getSalarioMensal() {
         return salarioMensal;
     }

@@ -1,28 +1,34 @@
 package br.ufal.ic.p2.wepayu.models;
 
+import br.ufal.ic.p2.wepayu.Sistema;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 
 public class CartaoDePonto implements Serializable {
-    protected LocalDate data;
 
-    public void setData(LocalDate data) {
+    private String data;
+
+    public void setData(String data) {
         this.data = data;
+    }
+
+    public CartaoDePonto() {
     }
 
     public void setHoras(Double horas) {
         this.horas = horas;
     }
 
-    protected Double horas;
+    private Double horas;
 
-    public CartaoDePonto(LocalDate data, Double horas) {
+    public CartaoDePonto(String data, Double horas) {
         this.data = data;
         this.horas = horas;
     }
 
-    public LocalDate getData() {
-        return this.data;
+    public String getData() {
+        return data;
     }
 
     public Double getHoras() {

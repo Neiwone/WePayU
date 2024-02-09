@@ -6,6 +6,9 @@ public class EmpregadoHorista extends Empregado implements Serializable {
     protected String salarioPorHora;
     public ArrayList<CartaoDePonto> cartao;
 
+    public EmpregadoHorista() {
+    }
+
     public String getSalarioPorHora() {
         return salarioPorHora;
     }

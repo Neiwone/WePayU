@@ -7,6 +7,10 @@ public class EmpregadoComissionado extends Empregado implements Serializable {
 
     protected String comissao;
 
+    public EmpregadoComissionado() {
+        this.vendas = new ArrayList<ResultadoDeVenda>();
+    }
+
     public String getSalarioMensal() {
         return salarioMensal;
     }

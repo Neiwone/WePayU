@@ -7,6 +7,7 @@ import java.beans.XMLEncoder;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -62,7 +63,8 @@ public class Sistema {
             case "agencia"          -> ((Banco) employee.getMetodoPagamento()).getAgencia();
             case "contaCorrente"    -> ((Banco) employee.getMetodoPagamento()).getContaCorrente();
             case "idSindicato"      -> employee.membroSindicado.getIdMembro();
-            case "taxaSindical"     -> employee.membroSindicado.getTaxaSindical();
+            case "taxaSindical"     -> String.format("%.2f", employee.membroSindicado.getTaxaSindical()).replace(".", ",");
+
 
             default -> throw new Exception("Atributo nao existe.");
 
@@ -103,7 +105,8 @@ public class Sistema {
         Empregado employee = empregados.get(employeeID);
         double horasAcumuladas = 0.0;
         for (CartaoDePonto card : ((EmpregadoHorista) employee).cartao) {
-            if ((card.getData().isAfter(initialDate) || card.getData().isEqual(initialDate)) && card.getData().isBefore(finalDate)) {
+            LocalDate date = Sistema.getLocalDate(card.getData());
+            if ((date.isAfter(initialDate) || date.isEqual(initialDate)) && date.isBefore(finalDate)) {
                 if (card.getHoras() > 8)
                     horasAcumuladas += 8.0;
                 else
@@ -122,7 +125,8 @@ public class Sistema {
 
         double horasAcumuladas = 0.0;
         for (CartaoDePonto card : ((EmpregadoHorista) employee).cartao) {
-            if ((card.getData().isAfter(initialDate) || card.getData().isEqual(initialDate)) && card.getData().isBefore(finalDate)) {
+            LocalDate date = Sistema.getLocalDate(card.getData());
+            if ((date.isAfter(initialDate) || date.isEqual(initialDate)) && date.isBefore(finalDate)) {
                 if (card.getHoras() > 8)
                     horasAcumuladas += (card.getHoras() - 8);
             }
@@ -140,7 +144,8 @@ public class Sistema {
 
         double valorTotal = 0.0;
         for(ResultadoDeVenda venda :((EmpregadoComissionado) employee).vendas) {
-            if ((venda.getData().isAfter(initialDate) || venda.getData().isEqual(initialDate)) && venda.getData().isBefore(finalDate))
+            LocalDate date = Sistema.getLocalDate(venda.getData());
+            if ((date.isAfter(initialDate) || date.isEqual(initialDate)) && date.isBefore(finalDate))
                 valorTotal += venda.getValor();
         }
 
@@ -156,7 +161,8 @@ public class Sistema {
 
         double taxaTotal = 0.0;
         for(TaxaServico venda : employee.membroSindicado.taxa) {
-            if ((venda.getData().isAfter(initialDate) || venda.getData().isEqual(initialDate)) && venda.getData().isBefore(finalDate)) {
+            LocalDate date =  Sistema.getLocalDate(venda.getData());
+            if ((date.isAfter(initialDate) || date.isEqual(initialDate)) && date.isBefore(finalDate)) {
                 taxaTotal += venda.getValor();
             }
         }
@@ -188,7 +194,7 @@ public class Sistema {
                     ((EmpregadoComissionado) employee).setSalarioMensal(value);
             }
             case "sindicalizado" -> {
-                if (!Boolean.valueOf(value))
+                if (!Boolean.parseBoolean(value))
                     employee.membroSindicado = null;
             }
             case "comissao" -> ((EmpregadoComissionado) employee).setComissao(value);
@@ -233,7 +239,7 @@ public class Sistema {
 
 
 
-    public static void changeEmployeeTypeToHorista(String employeeID, String salary) throws Exception {
+    public static void changeEmployeeTypeToHorista(String employeeID, String salary) {
 
         Empregado employee = empregados.get(employeeID);
 
@@ -243,7 +249,7 @@ public class Sistema {
         empregados.put(employeeID, employee);
     }
 
-    public static void changeEmployeeTypeToHorista(String employeeID) throws Exception {
+    public static void changeEmployeeTypeToHorista(String employeeID) {
 
         Empregado employee = empregados.get(employeeID);
 
@@ -253,7 +259,7 @@ public class Sistema {
         empregados.put(employeeID, employee);
     }
 
-    public static void changeEmployeeTypeToAssalariado(String employeeID, String salary) throws Exception {
+    public static void changeEmployeeTypeToAssalariado(String employeeID, String salary) {
 
         Empregado employee = empregados.get(employeeID);
 
@@ -263,7 +269,7 @@ public class Sistema {
         empregados.put(employeeID, employee);
     }
 
-    public static void changeEmployeeTypeToAssalariado(String employeeID) throws Exception {
+    public static void changeEmployeeTypeToAssalariado(String employeeID) {
 
         Empregado employee = empregados.get(employeeID);
 
@@ -273,7 +279,7 @@ public class Sistema {
         empregados.put(employeeID, employee);
     }
 
-    public static void changeEmployeeTypeToComissionado(String employeeID, String comissao) throws Exception {
+    public static void changeEmployeeTypeToComissionado(String employeeID, String comissao) {
 
         Empregado employee = empregados.get(employeeID);
 
@@ -283,7 +289,7 @@ public class Sistema {
         empregados.put(employeeID, employee);
     }
 
-    public static void changeEmployeeTypeToComissionado(String employeeID) throws Exception {
+    public static void changeEmployeeTypeToComissionado(String employeeID) {
 
         Empregado employee = empregados.get(employeeID);
 

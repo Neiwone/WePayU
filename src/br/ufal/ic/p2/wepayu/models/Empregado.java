@@ -6,6 +6,9 @@ public abstract class Empregado implements Serializable {
     protected String nome;
     protected String endereco;
 
+    public Empregado() {
+    }
+
     public MembroSindicado getMembroSindicado() {
         return membroSindicado;
     }

@@ -44,15 +44,7 @@ Como recomendado no arquivo de descrição do projeto, o sistema está utilizand
 
   
 
-Dentro da pasta “br.ufal.ic.p2.wepayu/models” estão localizadas as classes que modelam os objetos de domínio do sistema, como Empregado e suas subclasses
-
-  
-
-(EmpregadoAssalariado, EmpregadoComissionado, EmpregadoHorista), além de
-
-  
-
-outras classes como MetodoPagamento, PointCard, TaxaServico, etc. Essas classes representam os dados manipulados pelo sistema e integram a camada de modelo.
+Dentro da pasta “br.ufal.ic.p2.wepayu/models” estão localizadas as classes que modelam os objetos de domínio do sistema, como Empregado e suas subclasses (EmpregadoAssalariado, EmpregadoComissionado, EmpregadoHorista), além de outras classes como MetodoPagamento, PointCard, TaxaServico, etc. Essas classes representam os dados manipulados pelo sistema e integram a camada de modelo.
 
   
 

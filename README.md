@@ -5,6 +5,7 @@
 
 ## Alunos:
 [Rafael Luciano Lima da Silva](https://github.com/rafaellucian0) 
+
 [Vinícius da Costa Neitzke](https://github.com/Neiwone) 
 
 ## Design arquitetural

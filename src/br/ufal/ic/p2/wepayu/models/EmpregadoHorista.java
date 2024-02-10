@@ -25,6 +25,12 @@ public class EmpregadoHorista extends Empregado implements Serializable {
         this.salarioPorHora = salarioPorHora;
     }
 
+    public EmpregadoHorista(String id, String nome, String endereco, String salario) {
+        super(id, nome, endereco);
+        this.salarioPorHora = salario;
+        this.cartao = new ArrayList<CartaoDePonto>();
+    }
+
     public EmpregadoHorista(String nome, String endereco, String salario) {
         super(nome, endereco);
         this.salarioPorHora = salario;

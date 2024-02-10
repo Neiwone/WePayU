@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <java version="21.0.2" class="java.beans.XMLDecoder">
- <object class="java.util.HashMap">
+ <object class="java.util.LinkedHashMap">
   <void method="put">
-   <string>0</string>
+   <string>e85e978f-9b9d-4d00-815d-cb0133d609fc</string>
    <object class="br.ufal.ic.p2.wepayu.models.EmpregadoComissionado">
     <void property="comissao">
      <string>0,02</string>
     </void>
     <void property="endereco">
      <string>Rua dos Jooes, 333 - Campina Grande</string>
+    </void>
+    <void property="id">
+     <string>e85e978f-9b9d-4d00-815d-cb0133d609fc</string>
     </void>
     <void property="metodoPagamento">
      <object class="br.ufal.ic.p2.wepayu.models.EmMaos"/>
@@ -22,5 +25,4 @@
    </object>
   </void>
  </object>
- <int>1</int>
 </java>

@@ -25,6 +25,13 @@ public class EmpregadoComissionado extends Empregado implements Serializable {
 
     public ArrayList<ResultadoDeVenda> vendas;
 
+    public EmpregadoComissionado(String id, String nome, String endereco, String salario, String comissao) {
+        super(id, nome, endereco);
+        this.salarioMensal = salario;
+        this.comissao = comissao;
+        this.vendas = new ArrayList<ResultadoDeVenda>();
+    }
+
     public EmpregadoComissionado(String nome, String endereco, String salario, String comissao) {
         super(nome, endereco);
         this.salarioMensal = salario;

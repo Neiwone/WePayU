@@ -2,21 +2,34 @@ package br.ufal.ic.p2.wepayu.Exception;
 
 // Class "InputCheck" to throw errors about facade-methods parameters.
 
+import br.ufal.ic.p2.wepayu.Database;
 import br.ufal.ic.p2.wepayu.Sistema;
 import br.ufal.ic.p2.wepayu.models.Banco;
 import br.ufal.ic.p2.wepayu.models.EmpregadoComissionado;
 import br.ufal.ic.p2.wepayu.models.EmpregadoHorista;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-public class InputCheck extends Exception{
+public class InputCheck extends Exception {
+
+    private static Database instance;
+
+    static {
+        try {
+            instance = Database.getInstance();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     private static void checkEmployeeID(String employeeID) throws Exception {
         if(employeeID.isEmpty())
             throw new Exception("Identificacao do empregado nao pode ser nula.");
-        if(!Sistema.empregados.containsKey(employeeID))
+        if(!instance.getEmpregados().containsKey(employeeID))
             throw new Exception("Empregado nao existe.");
     }
 
@@ -94,15 +107,15 @@ public class InputCheck extends Exception{
         checkEmployeeID(employeeID);
 
         if(attribute.equals("comissao"))
-            if(!(Sistema.empregados.get(employeeID) instanceof EmpregadoComissionado))
+            if(!(instance.getEmpregado(employeeID) instanceof EmpregadoComissionado))
                 throw new Exception("Empregado nao eh comissionado.");
 
         if((attribute.equals("banco") || attribute.equals("agencia") || attribute.equals("contaCorrente")))
-            if(!(Sistema.empregados.get(employeeID).getMetodoPagamento() instanceof Banco))
+            if(!(instance.getEmpregado(employeeID).getMetodoPagamento() instanceof Banco))
                 throw new Exception("Empregado nao recebe em banco.");
 
         if((attribute.equals("idSindicato") || attribute.equals("taxaSindical")))
-            if (!Sistema.empregados.get(employeeID).getSindicalizado())
+            if (!instance.getEmpregado(employeeID).getSindicalizado())
                 throw new Exception("Empregado nao eh sindicalizado.");
     }
 
@@ -120,7 +133,7 @@ public class InputCheck extends Exception{
         if(hours.contains("-") || Double.parseDouble(hours.replace(",", ".")) == 0)
             throw new Exception("Horas devem ser positivas.");
 
-        if(!(Sistema.empregados.get(employeeID) instanceof EmpregadoHorista))
+        if(!(instance.getEmpregado(employeeID) instanceof EmpregadoHorista))
             throw new Exception("Empregado nao eh horista.");
 
     }
@@ -134,7 +147,7 @@ public class InputCheck extends Exception{
         if(value.contains("-") || Double.parseDouble(value.replace(",", ".")) == 0)
             throw new Exception("Valor deve ser positivo.");
 
-        if(!(Sistema.empregados.get(employeeID) instanceof EmpregadoComissionado))
+        if(!(instance.getEmpregado(employeeID) instanceof EmpregadoComissionado))
             throw new Exception("Empregado nao eh comissionado.");
     }
 
@@ -142,7 +155,7 @@ public class InputCheck extends Exception{
 
         checkEmployeeID(employeeID);
 
-        if(!(Sistema.empregados.get(employeeID) instanceof EmpregadoHorista))
+        if(!(instance.getEmpregado(employeeID) instanceof EmpregadoHorista))
             throw new Exception("Empregado nao eh horista.");
 
         int i = 0, day = 0, month = 0;
@@ -186,7 +199,7 @@ public class InputCheck extends Exception{
 
         checkEmployeeID(employeeID);
 
-        if(!(Sistema.empregados.get(employeeID) instanceof EmpregadoComissionado))
+        if(!(instance.getEmpregado(employeeID) instanceof EmpregadoComissionado))
             throw new Exception("Empregado nao eh comissionado.");
 
         int i = 0, day = 0, month = 0;
@@ -230,7 +243,7 @@ public class InputCheck extends Exception{
 
         checkEmployeeID(employeeID);
 
-        if(!Sistema.empregados.get(employeeID).getSindicalizado())
+        if(!instance.getEmpregado(employeeID).getSindicalizado())
             throw new Exception("Empregado nao eh sindicalizado.");
 
         int i = 0, day = 0, month = 0;
@@ -289,7 +302,7 @@ public class InputCheck extends Exception{
         checkEmployeeID(employeeID);
 
         if(attribute.equals("comissao"))
-            if (!(Sistema.empregados.get(employeeID) instanceof EmpregadoComissionado))
+            if (!(instance.getEmpregado(employeeID) instanceof EmpregadoComissionado))
                 throw new Exception("Empregado nao eh comissionado.");
 
         switch (attribute) {

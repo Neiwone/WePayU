@@ -1,13 +1,54 @@
 package br.ufal.ic.p2.wepayu.models;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 public abstract class Empregado implements Serializable {
+
     protected String nome;
     protected String endereco;
+    protected MembroSindicado membroSindicado;
+    protected String id;
+    protected MetodoPagamento metodoPagamento;
+
 
     public Empregado() {
     }
+
+    public Empregado(String nome, String endereco) {
+        setId(id = UUID.randomUUID().toString());
+        this.nome = nome;
+        this.endereco = endereco;
+        this.metodoPagamento = new EmMaos();
+    }
+
+    public Empregado(String id, String nome, String endereco) {
+        this.id = id;
+        this.nome = nome;
+        this.endereco = endereco;
+        this.metodoPagamento = new EmMaos();
+    }
+
+
+
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+    public void setEndereco(String endereco) {
+        this.endereco = endereco;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public boolean getSindicalizado() {
+        return (membroSindicado != null);
+    }
+
+
+
 
     public MembroSindicado getMembroSindicado() {
         return membroSindicado;
@@ -35,28 +76,6 @@ public abstract class Empregado implements Serializable {
         this.metodoPagamento = metodoPagamento;
     }
 
-    private MetodoPagamento metodoPagamento;
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public void setEndereco(String endereco) {
-        this.endereco = endereco;
-    }
-
-    public boolean getSindicalizado() {
-        return (membroSindicado != null);
-    }
-
-    public MembroSindicado membroSindicado;
-
-    public Empregado(String nome, String endereco) {
-        this.nome = nome;
-        this.endereco = endereco;
-        this.metodoPagamento = new EmMaos();
-    }
-
 
 
     public String getNome() {
@@ -66,6 +85,12 @@ public abstract class Empregado implements Serializable {
     public String getEndereco() {
         return endereco;
     }
+
+    public String getId() {
+        return id;
+    }
+
+
 
     public abstract String getSalario();
 

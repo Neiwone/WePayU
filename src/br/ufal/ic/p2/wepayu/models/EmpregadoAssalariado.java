@@ -11,6 +11,10 @@ public class EmpregadoAssalariado extends Empregado implements Serializable {
         return salarioMensal;
     }
 
+    public EmpregadoAssalariado(String id, String nome, String endereco, String salario) {
+        super(id, nome, endereco);
+        this.salarioMensal = salario;
+    }
     public EmpregadoAssalariado(String nome, String endereco, String salario) {
         super(nome, endereco);
         this.salarioMensal = salario;

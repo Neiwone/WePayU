@@ -2,54 +2,63 @@ package br.ufal.ic.p2.wepayu;
 
 import br.ufal.ic.p2.wepayu.models.*;
 
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 public class Sistema {
-    public static HashMap<String, Empregado> empregados;
 
-    public static Integer tamanho;
+    private Database instance;
 
-    public Sistema() {
-        empregados = new HashMap<>();
-        tamanho = 0;
+    public Sistema() throws IOException {
+        instance = Database.getInstance();;
     }
 
-    public static void saveToXML() throws IOException {
-        Files.createFile(Path.of("data.xml"));
-        BufferedOutputStream file = new BufferedOutputStream(new FileOutputStream("data.xml"));
-
-        XMLEncoder e = new XMLEncoder(file);
-        e.writeObject(empregados);
-        e.writeObject(tamanho);
-        e.close();
+    public void clear() throws IOException {
+        instance.clear();
     }
 
-    public static void getFromXML() throws FileNotFoundException {
-
-        BufferedInputStream file = new BufferedInputStream(new FileInputStream("data.xml"));
-
-        XMLDecoder d = new XMLDecoder(file);
-        empregados =  (HashMap<String, Empregado>) d.readObject();
-        tamanho = (Integer) d.readObject();
+    public void save() throws IOException {
+        instance.saveToXML();
     }
 
-    public static void clearXML() throws IOException {
-        Files.delete(Path.of("data.xml"));
+    public String createNewEmployee(String name, String address, String type ,String salary) throws Exception {
+
+        //  Checa qual o tipo do novo empregado.
+        if(type.equals("horista")) {
+            //  Cria e adiciona o novo empregado do tipo horista.
+            EmpregadoHorista novoEmpregadoHorista = new EmpregadoHorista(name, address, salary);
+            instance.addEmpregado(novoEmpregadoHorista);
+            return novoEmpregadoHorista.getId();
+        }
+        else if(type.equals("assalariado")) {
+            //  Cria e adiciona o novo empregado do tipo assalariado.
+            EmpregadoAssalariado novoEmpregadoAssalariado = new EmpregadoAssalariado(name, address, salary);
+            instance.addEmpregado(novoEmpregadoAssalariado);
+            return novoEmpregadoAssalariado.getId();
+        }
+        else
+            throw new Exception("Tipo invalido.");
+
     }
 
-    public static Object getEmployeeAttribute(String employeeID, String attribute) throws Exception {
+    public String createNewEmployee(String name, String address, String type, String salary, String commission) throws Exception {
 
-        Empregado employee = empregados.get(employeeID);
+        String id = UUID.randomUUID().toString();
+
+        EmpregadoComissionado novoEmpregadoComissionado = new EmpregadoComissionado(id, name, address, salary, commission);
+        instance.addEmpregado(novoEmpregadoComissionado);
+        return novoEmpregadoComissionado.getId();
+
+    }
+
+    public Object getEmployeeAttribute(String employeeID, String attribute) throws Exception {
+
+        Empregado employee = instance.getEmpregado(employeeID);
 
         return switch (attribute) {
             case "nome"             -> employee.getNome();
@@ -62,9 +71,8 @@ public class Sistema {
             case "banco"            -> ((Banco) employee.getMetodoPagamento()).getBanco();
             case "agencia"          -> ((Banco) employee.getMetodoPagamento()).getAgencia();
             case "contaCorrente"    -> ((Banco) employee.getMetodoPagamento()).getContaCorrente();
-            case "idSindicato"      -> employee.membroSindicado.getIdMembro();
-            case "taxaSindical"     -> String.format("%.2f", employee.membroSindicado.getTaxaSindical()).replace(".", ",");
-
+            case "idSindicato"      -> employee.getMembroSindicado().getIdMembro();
+            case "taxaSindical"     -> String.format("%.2f", employee.getMembroSindicado().getTaxaSindical()).replace(".", ",");
 
             default -> throw new Exception("Atributo nao existe.");
 
@@ -72,9 +80,9 @@ public class Sistema {
 
     }
 
-    public static String getEmployeeByName(String name, int index) throws Exception {
+    public String getEmployeeByName(String name, int index) throws Exception {
         int i = 1;
-        for (Map.Entry<String, Empregado> entry : Sistema.empregados.entrySet()) {
+        for (Map.Entry<String, Empregado> entry : instance.getEmpregados().entrySet()) {
             Empregado empregado = entry.getValue();
 
             if (name.contains(empregado.getNome())) {
@@ -87,6 +95,10 @@ public class Sistema {
         throw new Exception("Nao ha empregado com esse nome.");
     }
 
+    public void removeEmployee(String employeeID) {
+        instance.removeEmpregado(employeeID);
+    }
+
     public static LocalDate getLocalDate(String date) throws Exception {
 
         try {
@@ -97,12 +109,12 @@ public class Sistema {
 
     }
 
-    public static String getWorkedHours(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
+    public String getWorkedHours(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
 
         if (initialDate.isAfter(finalDate))
             throw new Exception("Data inicial nao pode ser posterior aa data final.");
 
-        Empregado employee = empregados.get(employeeID);
+        Empregado employee = instance.getEmpregado(employeeID);
         double horasAcumuladas = 0.0;
         for (CartaoDePonto card : ((EmpregadoHorista) employee).cartao) {
             LocalDate date = Sistema.getLocalDate(card.getData());
@@ -116,12 +128,12 @@ public class Sistema {
         return Integer.toString((int) horasAcumuladas);
     }
 
-    public static String getExtraWorkedHours(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
+    public String getExtraWorkedHours(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
 
         if (initialDate.isAfter(finalDate))
             throw new Exception("Data inicial nao pode ser posterior aa data final.");
 
-        Empregado employee = empregados.get(employeeID);
+        Empregado employee = instance.getEmpregado(employeeID);
 
         double horasAcumuladas = 0.0;
         for (CartaoDePonto card : ((EmpregadoHorista) employee).cartao) {
@@ -135,12 +147,12 @@ public class Sistema {
         return Double.toString(horasAcumuladas).replace(".", ",");
     }
 
-    public static String getSales(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
+    public String getSales(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
 
         if (initialDate.isAfter(finalDate))
             throw new Exception("Data inicial nao pode ser posterior aa data final.");
 
-        Empregado employee = empregados.get(employeeID);
+        Empregado employee = instance.getEmpregado(employeeID);
 
         double valorTotal = 0.0;
         for(ResultadoDeVenda venda :((EmpregadoComissionado) employee).vendas) {
@@ -152,15 +164,15 @@ public class Sistema {
         return String.format("%.2f", valorTotal).replace(".", ",");
     }
 
-    public static String getTotalPriceForTaxes(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
+    public String getTotalPriceForTaxes(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
 
         if (initialDate.isAfter(finalDate))
             throw new Exception("Data inicial nao pode ser posterior aa data final.");
 
-        Empregado employee = empregados.get(employeeID);
+        Empregado employee = instance.getEmpregado(employeeID);
 
         double taxaTotal = 0.0;
-        for(TaxaServico venda : employee.membroSindicado.taxa) {
+        for(TaxaServico venda : employee.getMembroSindicado().taxa) {
             LocalDate date =  Sistema.getLocalDate(venda.getData());
             if ((date.isAfter(initialDate) || date.isEqual(initialDate)) && date.isBefore(finalDate)) {
                 taxaTotal += venda.getValor();
@@ -170,9 +182,9 @@ public class Sistema {
         return String.format("%.2f", taxaTotal).replace(".", ",");
     }
 
-    public static void changeAttribute(String employeeID, String attribute, String value) throws Exception {
+    public void changeAttribute(String employeeID, String attribute, String value) throws Exception {
 
-        Empregado employee = Sistema.empregados.get(employeeID);
+        Empregado employee = instance.getEmpregado(employeeID);
 
         switch (attribute) {
             case "nome" -> employee.setNome(value);
@@ -195,7 +207,7 @@ public class Sistema {
             }
             case "sindicalizado" -> {
                 if (!Boolean.parseBoolean(value))
-                    employee.membroSindicado = null;
+                    employee.setMembroSindicado(null);
             }
             case "comissao" -> ((EmpregadoComissionado) employee).setComissao(value);
             case "metodoPagamento" -> {
@@ -211,92 +223,143 @@ public class Sistema {
         }
     }
 
-    public static boolean doesThisIDExists(String idSindicato) {
-        for(Map.Entry<String, Empregado> entry: Sistema.empregados.entrySet()) {
+    private boolean doesThisIDExists(String idSindicato) {
+        for(Map.Entry<String, Empregado> entry: instance.getEmpregados().entrySet()) {
             Empregado empregado = entry.getValue();
             if (empregado.getSindicalizado()) {
-                if (empregado.membroSindicado.getIdMembro().equals(idSindicato))
+                if (empregado.getMembroSindicado().getIdMembro().equals(idSindicato))
                     return true;
             }
         }
         return false;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public static void changeEmployeeTypeToHorista(String employeeID, String salary) {
-
-        Empregado employee = empregados.get(employeeID);
-
-        employee = new EmpregadoHorista(employee.getNome(), employee.getEndereco(), salary);
-
-        empregados.remove(employeeID);
-        empregados.put(employeeID, employee);
+    public void addNewPointCard(String employeeID, CartaoDePonto cartao) {
+        ((EmpregadoHorista) instance.getEmpregado(employeeID)).cartao.add(cartao);
     }
 
-    public static void changeEmployeeTypeToHorista(String employeeID) {
-
-        Empregado employee = empregados.get(employeeID);
-
-        employee = new EmpregadoHorista(employee.getNome(), employee.getEndereco(), null);
-
-        empregados.remove(employeeID);
-        empregados.put(employeeID, employee);
+    public void addNewSale(String employeeID, ResultadoDeVenda venda) {
+        ((EmpregadoComissionado) instance.getEmpregado(employeeID)).vendas.add(venda);
     }
 
-    public static void changeEmployeeTypeToAssalariado(String employeeID, String salary) {
+    public void addServiceTax(String SyndicateID, String date, String value) throws Exception {
+        for (Map.Entry<String, Empregado> entry: instance.getEmpregados().entrySet()) {
+            Empregado empregado = entry.getValue();
 
-        Empregado employee = empregados.get(employeeID);
+            if (empregado.getMembroSindicado() != null) {
+                if (Objects.equals(empregado.getMembroSindicado().idMembro, SyndicateID)) {
+                    empregado.getMembroSindicado().taxa.add(new TaxaServico(
+                            date,
+                            Double.parseDouble(value.replace(",", ".")))
+                    );
+                    return;
+                }
+            }
+        }
 
-        employee = new EmpregadoAssalariado(employee.getNome(), employee.getEndereco(), salary);
-
-        empregados.remove(employeeID);
-        empregados.put(employeeID, employee);
+        throw new Exception("Membro nao existe.");
     }
 
-    public static void changeEmployeeTypeToAssalariado(String employeeID) {
+    public void changeEmployeeInfo(String employeeID, String attribute, String value, String idSindicato, String taxaSindical) throws Exception {
+        if(attribute.equals("sindicalizado") && value.equals("true")) {
+            if (doesThisIDExists(idSindicato))
+                throw new Exception("Ha outro empregado com esta identificacao de sindicato");
+            else {
+                instance.getEmpregado(employeeID).setMembroSindicado(new MembroSindicado());
+                instance.getEmpregado(employeeID).getMembroSindicado().idMembro = idSindicato;
+                instance.getEmpregado(employeeID).getMembroSindicado().taxaSindical = Double.parseDouble(taxaSindical. replace(",","."));
+            }
+        }
 
-        Empregado employee = empregados.get(employeeID);
 
-        employee = new EmpregadoAssalariado(employee.getNome(), employee.getEndereco(), null);
-
-        empregados.remove(employeeID);
-        empregados.put(employeeID, employee);
     }
 
-    public static void changeEmployeeTypeToComissionado(String employeeID, String comissao) {
+    public void changeEmployeeInfo(String employeeID, String atributo, String valor1, String banco, String agencia, String contaCorrente) throws Exception {
 
-        Empregado employee = empregados.get(employeeID);
+        if(atributo.equals("metodoPagamento") && valor1.equals("banco"))
+            instance.getEmpregado(employeeID).setMetodoPagamento(new Banco(banco, agencia, contaCorrente));
 
-        employee = new EmpregadoComissionado(employee.getNome(), employee.getEndereco(), employee.getSalario(), comissao);
-
-        empregados.remove(employeeID);
-        empregados.put(employeeID, employee);
     }
 
-    public static void changeEmployeeTypeToComissionado(String employeeID) {
 
-        Empregado employee = empregados.get(employeeID);
+    public void changeEmployeesType(String emp, String atributo, String valor, String comissao) throws Exception {
+        if (atributo.equals("tipo")) {
+            switch (valor) {
+                case "horista" -> changeEmployeeTypeToHorista(emp, comissao);
+                case "assalariado" -> changeEmployeeTypeToAssalariado(emp, comissao);
+                case "comissionado" -> changeEmployeeTypeToComissionado(emp, comissao);
+                default -> throw new Exception("tipo invalido.");
+            }
+        }
+    }
 
-        employee = new EmpregadoComissionado(employee.getNome(), employee.getEndereco(), employee.getSalario(), null);
 
-        empregados.remove(employeeID);
-        empregados.put(employeeID, employee);
+
+
+
+
+
+
+
+
+    private void changeEmployeeTypeToHorista(String employeeID, String salary) {
+
+        Empregado employee = instance.getEmpregado(employeeID);
+
+        employee = new EmpregadoHorista(employee.getId(), employee.getNome(), employee.getEndereco(), salary);
+
+        removeEmployee(employeeID);
+        instance.addEmpregado(employeeID, employee);
+    }
+
+    private void changeEmployeeTypeToHorista(String employeeID) {
+
+        Empregado employee = instance.getEmpregado(employeeID);
+
+        employee = new EmpregadoHorista(employee.getId(), employee.getNome(), employee.getEndereco(), null);
+
+        removeEmployee(employeeID);
+        instance.addEmpregado(employeeID, employee);
+    }
+
+    private void changeEmployeeTypeToAssalariado(String employeeID, String salary) {
+
+        Empregado employee = instance.getEmpregado(employeeID);
+
+        employee = new EmpregadoAssalariado(employee.getId(), employee.getNome(), employee.getEndereco(), salary);
+
+        removeEmployee(employeeID);
+        instance.addEmpregado(employeeID, employee);
+    }
+
+    private void changeEmployeeTypeToAssalariado(String employeeID) {
+
+        Empregado employee = instance.getEmpregado(employeeID);
+
+        employee = new EmpregadoAssalariado(employee.getId(), employee.getNome(), employee.getEndereco(), null);
+
+        removeEmployee(employeeID);
+        instance.addEmpregado(employeeID, employee);
+    }
+
+    private void changeEmployeeTypeToComissionado(String employeeID, String comissao) {
+
+        Empregado employee = instance.getEmpregado(employeeID);
+
+        employee = new EmpregadoComissionado(employee.getId(), employee.getNome(), employee.getEndereco(), employee.getSalario(), comissao);
+
+        removeEmployee(employeeID);
+        instance.addEmpregado(employeeID, employee);
+    }
+
+    private void changeEmployeeTypeToComissionado(String employeeID) {
+
+        Empregado employee = instance.getEmpregado(employeeID);
+
+        employee = new EmpregadoComissionado(employee.getId(), employee.getNome(), employee.getEndereco(), employee.getSalario(), null);
+
+        removeEmployee(employeeID);
+        instance.addEmpregado(employeeID, employee);
     }
 
 

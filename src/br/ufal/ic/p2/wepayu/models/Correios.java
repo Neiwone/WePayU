@@ -5,4 +5,8 @@ import java.io.Serializable;
 public class Correios extends MetodoPagamento implements Serializable {
     public Correios() {
     }
+
+    public String getTipo() {
+        return "correios";
+    }
 }

@@ -7,6 +7,9 @@ public class Banco extends MetodoPagamento  implements Serializable {
     private String agencia;
     private String contaCorrente;
 
+    public String getTipo() {
+        return "banco";
+    }
     public Banco(String banco, String agencia, String contaCorrente) {
         this.banco = banco;
         this.agencia = agencia;

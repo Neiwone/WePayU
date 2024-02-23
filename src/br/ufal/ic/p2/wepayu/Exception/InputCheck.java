@@ -107,11 +107,11 @@ public class InputCheck extends Exception {
         checkEmployeeID(employeeID);
 
         if(attribute.equals("comissao"))
-            if(!(instance.getEmpregado(employeeID) instanceof EmpregadoComissionado))
+            if(!(instance.getEmpregado(employeeID).getTipo().equals("comissionado")))
                 throw new Exception("Empregado nao eh comissionado.");
 
         if((attribute.equals("banco") || attribute.equals("agencia") || attribute.equals("contaCorrente")))
-            if(!(instance.getEmpregado(employeeID).getMetodoPagamento() instanceof Banco))
+            if(!(instance.getEmpregado(employeeID).getMetodoPagamento().getTipo().equals("banco")))
                 throw new Exception("Empregado nao recebe em banco.");
 
         if((attribute.equals("idSindicato") || attribute.equals("taxaSindical")))
@@ -133,7 +133,7 @@ public class InputCheck extends Exception {
         if(hours.contains("-") || Double.parseDouble(hours.replace(",", ".")) == 0)
             throw new Exception("Horas devem ser positivas.");
 
-        if(!(instance.getEmpregado(employeeID) instanceof EmpregadoHorista))
+        if(!(instance.getEmpregado(employeeID).getTipo().equals("horista")))
             throw new Exception("Empregado nao eh horista.");
 
     }
@@ -147,7 +147,7 @@ public class InputCheck extends Exception {
         if(value.contains("-") || Double.parseDouble(value.replace(",", ".")) == 0)
             throw new Exception("Valor deve ser positivo.");
 
-        if(!(instance.getEmpregado(employeeID) instanceof EmpregadoComissionado))
+        if(!(instance.getEmpregado(employeeID).getTipo().equals("comissionado")))
             throw new Exception("Empregado nao eh comissionado.");
     }
 
@@ -155,7 +155,7 @@ public class InputCheck extends Exception {
 
         checkEmployeeID(employeeID);
 
-        if(!(instance.getEmpregado(employeeID) instanceof EmpregadoHorista))
+        if(!(instance.getEmpregado(employeeID).getTipo().equals("horista")))
             throw new Exception("Empregado nao eh horista.");
 
         int i = 0, day = 0, month = 0;
@@ -199,7 +199,7 @@ public class InputCheck extends Exception {
 
         checkEmployeeID(employeeID);
 
-        if(!(instance.getEmpregado(employeeID) instanceof EmpregadoComissionado))
+        if(!(instance.getEmpregado(employeeID).getTipo().equals("comissionado")))
             throw new Exception("Empregado nao eh comissionado.");
 
         int i = 0, day = 0, month = 0;
@@ -302,7 +302,7 @@ public class InputCheck extends Exception {
         checkEmployeeID(employeeID);
 
         if(attribute.equals("comissao"))
-            if (!(instance.getEmpregado(employeeID) instanceof EmpregadoComissionado))
+            if (!(instance.getEmpregado(employeeID).getTipo().equals("comissionado")))
                 throw new Exception("Empregado nao eh comissionado.");
 
         switch (attribute) {

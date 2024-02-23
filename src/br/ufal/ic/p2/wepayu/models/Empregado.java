@@ -59,13 +59,7 @@ public abstract class Empregado implements Serializable {
     }
 
     public String getMetodo() {
-        if(metodoPagamento instanceof EmMaos)
-            return "emMaos";
-        if(metodoPagamento instanceof Correios)
-            return "correios";
-        if(metodoPagamento instanceof Banco)
-            return "banco";
-        return "";
+        return metodoPagamento.getTipo();
     }
 
     public MetodoPagamento getMetodoPagamento() {

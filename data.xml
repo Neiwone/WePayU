@@ -2,7 +2,7 @@
 <java version="21.0.2" class="java.beans.XMLDecoder">
  <object class="java.util.LinkedHashMap">
   <void method="put">
-   <string>e85e978f-9b9d-4d00-815d-cb0133d609fc</string>
+   <string>b2be0922-90c2-4e7f-baf7-f2b35e4403e9</string>
    <object class="br.ufal.ic.p2.wepayu.models.EmpregadoComissionado">
     <void property="comissao">
      <string>0,02</string>
@@ -11,7 +11,7 @@
      <string>Rua dos Jooes, 333 - Campina Grande</string>
     </void>
     <void property="id">
-     <string>e85e978f-9b9d-4d00-815d-cb0133d609fc</string>
+     <string>b2be0922-90c2-4e7f-baf7-f2b35e4403e9</string>
     </void>
     <void property="metodoPagamento">
      <object class="br.ufal.ic.p2.wepayu.models.EmMaos"/>

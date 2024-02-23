@@ -1,5 +1,5 @@
 package br.ufal.ic.p2.wepayu.models;
 import java.io.Serializable;
-public class MetodoPagamento  implements Serializable{
-
+public abstract class MetodoPagamento  implements Serializable{
+    public abstract String getTipo();
 }

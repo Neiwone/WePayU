@@ -198,11 +198,11 @@ public class Sistema {
                     changeEmployeeTypeToAssalariado(employeeID);
             }
             case "salario" -> {
-                if (employee instanceof EmpregadoAssalariado)
+                if (employee.getTipo().equals("assalariado"))
                     ((EmpregadoAssalariado) employee).setSalarioMensal(value);
-                else if (employee instanceof EmpregadoHorista)
+                else if (employee.getTipo().equals("horista"))
                     ((EmpregadoHorista) employee).setSalarioPorHora(value);
-                else if (employee instanceof EmpregadoComissionado)
+                else if (employee.getTipo().equals("comissionado"))
                     ((EmpregadoComissionado) employee).setSalarioMensal(value);
             }
             case "sindicalizado" -> {

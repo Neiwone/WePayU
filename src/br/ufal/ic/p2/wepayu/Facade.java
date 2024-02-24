@@ -13,14 +13,17 @@ public class Facade {
         sistema = new Sistema();
     }
 
+
+
     /**
      * Method responsible for creating a new employee in our system.
-     * @param nome name of the employee;
-     * @param endereco address of the employee;
-     * @param tipo type of employee;
-     * @param salario salary of the employee;
-     * @return UUID of the new employee;
+     * @param nome employee's name;
+     * @param endereco employee's address;
+     * @param tipo kind of employee;
+     * @param salario employee's salary;
+     * @return employee's ID;
      * @throws Exception in case of any incorrect parameters.
+     * @see Facade#criarEmpregado(String, String, String, String, String)
      */
     public String criarEmpregado(String nome, String endereco, String tipo, String salario) throws Exception {
 
@@ -31,9 +34,11 @@ public class Facade {
         return sistema.createNewEmployee(nome, endereco, tipo, salario);
     }
 
+
+
     /**
      * Method responsible for creating a new employee in our system.
-     * (The difference about this method and the {@link Facade#criarEmpregado(String, String, String, String) criarEmpregado} is that here we create a commissioned employee with commission).
+     * (The difference about this method and {@link Facade#criarEmpregado(String, String, String, String) criarEmpregado} is that here we create a commissioned employee with commission).
      * @param nome employee's name;
      * @param endereco employee's address;
      * @param tipo kind of employee;
@@ -41,6 +46,7 @@ public class Facade {
      * @param comissao employee's commission;
      * @return employee's ID;
      * @throws Exception in case of any incorrect parameters.
+     * @see Facade#criarEmpregado(String, String, String, String)
      */
     public String criarEmpregado(String nome, String endereco, String tipo, String salario, String comissao) throws Exception {
 
@@ -51,13 +57,14 @@ public class Facade {
         return sistema.createNewEmployee(nome, endereco, tipo, salario, comissao);
     }
 
+
+
     /**
-     * Metodo getAtributoEmpregado: retorna o atributo desejado do empregado identificado pelo ID.
-     *
-     * @param emp ID do empregado
-     * @param atributo Atributo
-     * @return atributo do empregado indentificado pela chave "emp"
-     * @throws Exception Erro sobre algum paramentro
+     * Method responsible for returning an employee's attribute.
+     * @param emp employee's ID;
+     * @param atributo attribute;
+     * @return employee's attribute;
+     * @throws Exception in case of any incorrect parameters.
      */
     public Object getAtributoEmpregado(String emp, String atributo) throws Exception {
 
@@ -69,12 +76,29 @@ public class Facade {
 
     }
 
+
+
+    /**
+     * Method responsible for returning the employee's ID that contains the required name.
+     * @param nome employee's name;
+     * @param indice which employee (first one, second one, ...);
+     * @return employee's ID;
+     * @throws Exception in case of any incorrect parameters.
+     */
     public String getEmpregadoPorNome(String nome, int indice) throws Exception {
         //  Retorna a chave do empregado com o nome informado nos parametros.
         //  ( Caso haja dois ou mais empregados com o mesmo nome, o parametros
         //  indice é responsável em dizer qual é o certo).
         return sistema.getEmployeeByName(nome, indice);
     }
+
+
+
+    /**
+     * Method responsible for removing an employee.
+     * @param emp employee's ID;
+     * @throws Exception in case of invalid employee's ID.
+     */
     public void removerEmpregado(String emp) throws Exception {
 
         //  Verifica os parametros para possiveis erros.
@@ -84,12 +108,14 @@ public class Facade {
         sistema.removeEmployee(emp);
     }
 
+
+
     /**
-     * O metodo lancaCartao adiciona um novo cartão de ponto na lista de cartão do empregado desejado.
-     * @param emp Employee UUID;
-     * @param data Date of Timecard;
-     * @param horas Time of Timecard;
-     * @throws Exception An error is shown if any of the parameters is incorrect.
+     * Method responsible for adding a new timecard to an {@link Empregado employee}.
+     * @param emp employee's ID;
+     * @param data date of timecard;
+     * @param horas time of timecard;
+     * @throws Exception in case of any invalid parameters.
      */
     public void lancaCartao(String emp, String data, String horas) throws Exception {
 
@@ -106,6 +132,17 @@ public class Facade {
         sistema.addNewPointCard(emp, novoPonto);
 
     }
+
+
+
+    /**
+     * Method responsible for returning worked hours by an employee at a date gap.
+     * @param emp employee's ID;
+     * @param dataInicial initial date;
+     * @param dataFinal final date;
+     * @return the worked hours;
+     * @throws Exception in case of any invalid parameters.
+     */
     public String getHorasNormaisTrabalhadas(String emp, String dataInicial, String dataFinal) throws Exception {
 
         //  Verifica os parametros para possiveis erros.
@@ -119,6 +156,17 @@ public class Facade {
         return sistema.getWorkedHours(emp, initialDate, finalDate);
 
     }
+
+
+
+    /**
+     * Method responsible for returning extra worked hours by an employee at a date gap.
+     * @param emp employee's ID;
+     * @param dataInicial initial date;
+     * @param dataFinal final date;
+     * @return the extra worked hours;
+     * @throws Exception in case of any invalid parameters.
+     */
     public String getHorasExtrasTrabalhadas(String emp, String dataInicial, String dataFinal) throws Exception {
 
         // Check dos parametros para possiveis erros.
@@ -131,6 +179,16 @@ public class Facade {
         //  Retorna as horas extras trabalhadas naquele intervalo de tempo.
         return sistema.getExtraWorkedHours(emp, initialDate, finalDate);
     }
+
+
+
+    /**
+     * Method responsible for adding a new sales record to an {@link Empregado employee}.
+     * @param emp employee's ID;
+     * @param data date of the sales;
+     * @param valor value of the saler;
+     * @throws Exception in case of any invalid parameters.
+     */
     public void lancaVenda(String emp, String data, String valor) throws Exception {
 
         //  Verifica os parametros para possiveis erros.
@@ -146,6 +204,16 @@ public class Facade {
         sistema.addNewSale(emp, novaVenda);
 
     }
+
+
+
+    /**
+     * Method responsible for returning the sales of an {@link Empregado employee}.
+     * @param emp employee's ID;
+     * @param dataInicial initial date;
+     * @param dataFinal final date;
+     * @throws Exception in case of any invalid parameters.
+     */
     public String getVendasRealizadas(String emp, String dataInicial, String dataFinal) throws Exception {
 
         //  Check dos parametros para possiveis erros.
@@ -159,6 +227,17 @@ public class Facade {
         return sistema.getSales(emp, initialDate, finalDate);
 
     }
+
+
+
+    /**
+     * Method responsible for returning the total {@link MembroSindicado#taxa tax service} of a {@link MembroSindicado Syndicate Member}.
+     * @param emp employee's ID;
+     * @param dataInicial initial date;
+     * @param dataFinal final date;
+     * @return sum of taxes;
+     * @throws Exception in case of any invalid parameters.
+     */
     public String getTaxasServico (String emp, String dataInicial , String dataFinal) throws Exception {
 
         // Check dos parametros para possiveis erros.
@@ -172,6 +251,16 @@ public class Facade {
         return sistema.getTotalPriceForTaxes(emp, initialDate, finalDate);
 
    }
+
+
+
+    /**
+     * Method responsible for adding a new tax service to an {@link MembroSindicado Syndicate Member}
+     * @param membro Syndicate Member's ID;
+     * @param data date of the tax;
+     * @param valor tax's value;
+     * @throws Exception in case of any invalid parameters.
+     */
     public void lancaTaxaServico (String membro, String data, String valor) throws Exception {
 
         // Check dos parametros para possiveis erros.
@@ -180,6 +269,19 @@ public class Facade {
         sistema.addServiceTax(membro, data, valor);
 
     }
+
+
+
+    /**
+     * Method responsible for changing any attribute of an employee.
+     * @param emp employee's ID;
+     * @param atributo attribute to be changed;
+     * @param valor1 attribute value;
+     * @throws Exception in case of any invalid parameters.
+     * @see Facade#alteraEmpregado(String, String, String, String, String, String)
+     * @see Facade#alteraEmpregado(String, String, String, String, String)
+     * @see Facade#alteraEmpregado(String, String, String, String)
+     */
     public void alteraEmpregado(String emp, String atributo, String valor1) throws Exception {
 
         // Check dos parametros para possiveis erros.
@@ -188,18 +290,66 @@ public class Facade {
         // Muda o atributo do empregado para o valor1.
         sistema.changeAttribute(emp, atributo, valor1);
     }
+
+
+
+    /**
+     * Method responsible for changing any attribute of an employee.
+     * (Most used to change {@link MembroSindicado Syndicate Member} info)
+     * @param emp employee's ID;
+     * @param atributo attribute to be changed;
+     * @param valor1 attribute value;
+     * @param idSindicato {@link MembroSindicado Syndicate Member's} ID;
+     * @param taxaSindical {@link MembroSindicado Syndicate Member's} tax;
+     * @throws Exception in case of any invalid parameters.
+     * @see Facade#alteraEmpregado(String, String, String, String, String, String)
+     * @see Facade#alteraEmpregado(String, String, String, String)
+     * @see Facade#alteraEmpregado(String, String, String)
+     */
     public void alteraEmpregado(String emp, String atributo, String valor1, String idSindicato, String taxaSindical) throws Exception {
 
         InputCheck.changeEmployeeInfo(emp, atributo, valor1, idSindicato, taxaSindical, null);
 
         sistema.changeEmployeeInfo(emp,atributo, valor1, idSindicato, taxaSindical);
     }
+
+
+
+    /**
+     * Method responsible for changing any attribute of an employee.
+     * (Most used to change employee's {@link Banco bank} info)
+     * @param emp employee's ID;
+     * @param atributo attribute to be changed;
+     * @param valor1 attribute value;
+     * @param agencia bank agency;
+     * @param banco bank's name;
+     * @param contaCorrente account;
+     * @throws Exception in case of any invalid parameters.
+     * @see Facade#alteraEmpregado(String, String, String, String, String)
+     * @see Facade#alteraEmpregado(String, String, String, String)
+     * @see Facade#alteraEmpregado(String, String, String)
+     */
     public void alteraEmpregado(String emp, String atributo, String valor1, String banco, String agencia, String contaCorrente) throws Exception {
 
         InputCheck.changeEmployeeInfo(emp, atributo, valor1, banco, agencia, contaCorrente);
 
         sistema.changeEmployeeInfo(emp,atributo, valor1, banco, agencia, contaCorrente);
     }
+
+
+
+    /**
+     * Method responsible for changing any attribute of an employee.
+     * (Most used to change commission/salary value)
+     * @param emp employee's ID;
+     * @param atributo attribute to be changed;
+     * @param valor attribute value;
+     * @param comissao commission value;
+     * @throws Exception in case of any invalid parameters.
+     * @see Facade#alteraEmpregado(String, String, String, String, String, String)
+     * @see Facade#alteraEmpregado(String, String, String, String, String)
+     * @see Facade#alteraEmpregado(String, String, String)
+     */
     public void alteraEmpregado(String emp, String atributo, String valor, String comissao) throws Exception {
 
         InputCheck.changeEmployeeInfo(emp, atributo, valor, comissao, null, null);
@@ -217,6 +367,7 @@ public class Facade {
     }
 
 
+
     /**
      * Method responsible for clearing the system, this means that all employees in our system are going to be erased.
      * (This method also deletes the data persistence).
@@ -225,6 +376,7 @@ public class Facade {
     public void zerarSistema() throws IOException {
         sistema.clear();
     }
+
 
 
     /**

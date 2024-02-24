@@ -5,10 +5,6 @@ import br.ufal.ic.p2.wepayu.models.*;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
 
 public class Facade {
 
@@ -17,6 +13,15 @@ public class Facade {
         sistema = new Sistema();
     }
 
+    /**
+     * Method responsible for creating a new employee in our system.
+     * @param nome name of the employee;
+     * @param endereco address of the employee;
+     * @param tipo type of employee;
+     * @param salario salary of the employee;
+     * @return UUID of the new employee;
+     * @throws Exception in case of any incorrect parameters.
+     */
     public String criarEmpregado(String nome, String endereco, String tipo, String salario) throws Exception {
 
         //  Verifica os parametros para possiveis erros.
@@ -26,6 +31,17 @@ public class Facade {
         return sistema.createNewEmployee(nome, endereco, tipo, salario);
     }
 
+    /**
+     * Method responsible for creating a new employee in our system.
+     * (The difference about this method and the {@link Facade#criarEmpregado(String, String, String, String) criarEmpregado} is that here we create a commissioned employee with commission).
+     * @param nome employee's name;
+     * @param endereco employee's address;
+     * @param tipo kind of employee;
+     * @param salario employee's salary;
+     * @param comissao employee's commission;
+     * @return employee's ID;
+     * @throws Exception in case of any incorrect parameters.
+     */
     public String criarEmpregado(String nome, String endereco, String tipo, String salario, String comissao) throws Exception {
 
         //  Verifica os parametros para possiveis erros.
@@ -70,10 +86,10 @@ public class Facade {
 
     /**
      * O metodo lancaCartao adiciona um novo cartão de ponto na lista de cartão do empregado desejado.
-     * @param emp
-     * @param data
-     * @param horas
-     * @throws Exception
+     * @param emp Employee UUID;
+     * @param data Date of Timecard;
+     * @param horas Time of Timecard;
+     * @throws Exception An error is shown if any of the parameters is incorrect.
      */
     public void lancaCartao(String emp, String data, String horas) throws Exception {
 
@@ -201,11 +217,20 @@ public class Facade {
     }
 
 
-
+    /**
+     * Method responsible for clearing the system, this means that all employees in our system are going to be erased.
+     * (This method also deletes the data persistence).
+     * @throws IOException in case the .xml file won't be found.
+     */
     public void zerarSistema() throws IOException {
         sistema.clear();
     }
 
+
+    /**
+     * Method responsible for ending the system, here we do the data persistence by saving all information in a .xml file.
+     * @throws IOException in case the .xml file won't be found.
+     */
     public void encerrarSistema() throws IOException {
         sistema.save();
     }

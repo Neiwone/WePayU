@@ -358,8 +358,8 @@ public class Facade {
     }
 
 
-    public void totalFolha(String data) throws Exception {
-
+    public String totalFolha(String data) throws Exception {
+        return String.format("%.2f", sistema.generateTotalPayroll(data)).replace('.', ',');
     }
 
     public void rodaFolha(String data, String saida) {

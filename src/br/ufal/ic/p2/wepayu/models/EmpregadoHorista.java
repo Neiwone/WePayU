@@ -17,15 +17,15 @@ public class EmpregadoHorista extends Empregado implements Serializable {
         this.cartao = cartao;
     }
 
-    public EmpregadoHorista(String id, String nome, String endereco, String salario) {
+    public EmpregadoHorista(String id, String nome, String endereco, Double salario) {
         super(id, nome, endereco);
-        this.salario = Double.parseDouble(salario.replace(',', '.'));
+        this.salario = salario;
         this.cartao = new ArrayList<>();
     }
 
-    public EmpregadoHorista(String nome, String endereco, String salario) {
+    public EmpregadoHorista(String nome, String endereco, Double salario) {
         super(nome, endereco);
-        this.salario = Double.parseDouble(salario.replace(',', '.'));
+        this.salario = salario;
         this.cartao = new ArrayList<>();
     }
 

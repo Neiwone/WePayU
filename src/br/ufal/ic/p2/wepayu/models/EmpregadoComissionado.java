@@ -21,17 +21,17 @@ public class EmpregadoComissionado extends Empregado implements Serializable {
 
     public ArrayList<ResultadoDeVenda> vendas;
 
-    public EmpregadoComissionado(String id, String nome, String endereco, String salario, String comissao) {
+    public EmpregadoComissionado(String id, String nome, String endereco, Double salario, Double comissao) {
         super(id, nome, endereco);
-        this.salario = Double.parseDouble(salario.replace(',', '.'));
-        this.comissao = Double.parseDouble(comissao.replace(',', '.'));
+        this.salario = salario;
+        this.comissao = comissao;
         this.vendas = new ArrayList<>();
     }
 
-    public EmpregadoComissionado(String nome, String endereco, String salario, String comissao) {
+    public EmpregadoComissionado(String nome, String endereco, Double salario, Double comissao) {
         super(nome, endereco);
-        this.salario = Double.parseDouble(salario.replace(',', '.'));
-        this.comissao = Double.parseDouble(comissao.replace(',', '.'));
+        this.salario = salario;
+        this.comissao = comissao;
         this.vendas = new ArrayList<>();
     }
 

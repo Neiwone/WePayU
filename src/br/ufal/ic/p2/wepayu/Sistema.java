@@ -3,9 +3,12 @@ package br.ufal.ic.p2.wepayu;
 import br.ufal.ic.p2.wepayu.models.*;
 
 import java.io.*;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -31,7 +34,7 @@ public class Sistema {
         //  Checa qual o tipo do novo empregado.
         if(type.equals("horista")) {
             //  Cria e adiciona o novo empregado do tipo horista.
-            EmpregadoHorista novoEmpregadoHorista = new EmpregadoHorista(name, address, salary);
+            EmpregadoHorista novoEmpregadoHorista = new EmpregadoHorista(name, address, Double.parseDouble(salary.replace(',', '.')));
             instance.addEmpregado(novoEmpregadoHorista);
             return novoEmpregadoHorista.getId();
         }
@@ -50,7 +53,7 @@ public class Sistema {
 
         String id = UUID.randomUUID().toString();
 
-        EmpregadoComissionado novoEmpregadoComissionado = new EmpregadoComissionado(id, name, address, salary, commission);
+        EmpregadoComissionado novoEmpregadoComissionado = new EmpregadoComissionado(id, name, address, Double.parseDouble(salary.replace(',', '.')), Double.parseDouble(commission.replace(',', '.')));
         instance.addEmpregado(novoEmpregadoComissionado);
         return novoEmpregadoComissionado.getId();
 
@@ -300,7 +303,7 @@ public class Sistema {
 
         Empregado employee = instance.getEmpregado(employeeID);
 
-        employee = new EmpregadoHorista(employee.getId(), employee.getNome(), employee.getEndereco(), salary);
+        employee = new EmpregadoHorista(employee.getId(), employee.getNome(), employee.getEndereco(), Double.parseDouble(salary.replace(',', '.')));
 
         removeEmployee(employeeID);
         instance.addEmpregado(employeeID, employee);
@@ -340,7 +343,7 @@ public class Sistema {
 
         Empregado employee = instance.getEmpregado(employeeID);
 
-        employee = new EmpregadoComissionado(employee.getId(), employee.getNome(), employee.getEndereco(), String.valueOf(employee.getSalario()), comissao);
+        employee = new EmpregadoComissionado(employee.getId(), employee.getNome(), employee.getEndereco(), employee.getSalario(), Double.parseDouble(comissao.replace(',', '.')));
 
         removeEmployee(employeeID);
         instance.addEmpregado(employeeID, employee);
@@ -350,14 +353,59 @@ public class Sistema {
 
         Empregado employee = instance.getEmpregado(employeeID);
 
-        employee = new EmpregadoComissionado(employee.getId(), employee.getNome(), employee.getEndereco(), String.valueOf(employee.getSalario()), null);
+        employee = new EmpregadoComissionado(employee.getId(), employee.getNome(), employee.getEndereco(), employee.getSalario(), null);
 
         removeEmployee(employeeID);
         instance.addEmpregado(employeeID, employee);
     }
 
 
+    public Double getRawSalary(Empregado employee, LocalDate localDate) throws Exception {
+        switch (employee.getTipo()) {
+            case "assalariado" -> { return employee.getSalario(); }
+            case "horista" -> {
+                double workedHours = Double.parseDouble(getWorkedHours(employee.getId(), localDate.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY)), localDate).replace(',', '.'));
+                double extraWorkedHours = Double.parseDouble(getExtraWorkedHours(employee.getId(), localDate.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY)), localDate).replace(',', '.'));
+                return (workedHours + (extraWorkedHours * 1.5)) * employee.getSalario();
+            }
+            case "comissionado" -> {
+                Double sales = Double.valueOf(getSales(employee.getId(),  localDate.minusDays(13), localDate).replace(',', '.'));
+                System.out.println(employee.getNome());
+                System.out.println(sales);
+                return employee.getSalario() + sales;
+            }
+        }
+        return 0.0;
+    }
 
+
+    public Double generateTotalPayroll(String date) throws Exception {
+        Double totalToPay = 0.0;
+        LocalDate localDate = getLocalDate(date);
+        for(Map.Entry<String, Empregado> employees: instance.getEmpregados().entrySet()){
+            Empregado employee = employees.getValue();
+            switch (employee.getTipo())
+            {
+                case "assalariado" -> {
+                    if(localDate == localDate.with(TemporalAdjusters.lastDayOfMonth()))
+                        totalToPay += getRawSalary(employee, localDate);
+                }
+                case "horista" -> {
+                    if(localDate.getDayOfWeek().equals(DayOfWeek.FRIDAY))
+                        totalToPay += getRawSalary(employee, localDate);
+                }
+                case "comissionado" -> {
+                    if(((ChronoUnit.DAYS.between(LocalDate.of(2005,1,1), localDate)) + 1) % 14 == 0)
+                        totalToPay += getRawSalary(employee, localDate);
+                }
+            }
+        }
+        return totalToPay;
+    }
+
+    public void generatePayroll(String date, String file) {
+
+    }
 
 
 

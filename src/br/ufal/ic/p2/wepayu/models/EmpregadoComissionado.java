@@ -3,17 +3,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class EmpregadoComissionado extends Empregado implements Serializable {
-    protected String salarioMensal;
 
-    protected String comissao;
+
+    protected Double comissao;
 
     public EmpregadoComissionado() {
-        this.vendas = new ArrayList<ResultadoDeVenda>();
     }
 
-    public String getSalarioMensal() {
-        return salarioMensal;
-    }
 
     public ArrayList<ResultadoDeVenda> getVendas() {
         return vendas;
@@ -27,23 +23,19 @@ public class EmpregadoComissionado extends Empregado implements Serializable {
 
     public EmpregadoComissionado(String id, String nome, String endereco, String salario, String comissao) {
         super(id, nome, endereco);
-        this.salarioMensal = salario;
-        this.comissao = comissao;
-        this.vendas = new ArrayList<ResultadoDeVenda>();
+        this.salario = Double.parseDouble(salario.replace(',', '.'));
+        this.comissao = Double.parseDouble(comissao.replace(',', '.'));
+        this.vendas = new ArrayList<>();
     }
 
     public EmpregadoComissionado(String nome, String endereco, String salario, String comissao) {
         super(nome, endereco);
-        this.salarioMensal = salario;
-        this.comissao = comissao;
-        this.vendas = new ArrayList<ResultadoDeVenda>();
+        this.salario = Double.parseDouble(salario.replace(',', '.'));
+        this.comissao = Double.parseDouble(comissao.replace(',', '.'));
+        this.vendas = new ArrayList<>();
     }
 
-    public void setSalarioMensal(String salarioMensal) {
-        this.salarioMensal = salarioMensal;
-    }
-
-    public void setComissao(String comissao) {
+    public void setComissao(Double comissao) {
         this.comissao = comissao;
     }
 
@@ -51,16 +43,12 @@ public class EmpregadoComissionado extends Empregado implements Serializable {
         return "comissionado";
     }
 
-
-    public String getComissao() {
+    public Double getComissao() {
         return comissao;
     }
 
 
-    public String getSalario() {
-        if(salarioMensal.contains(","))
-            return salarioMensal;
-        else
-            return salarioMensal + ",00";
+    public Double getSalario() {
+        return salario;
     }
 }

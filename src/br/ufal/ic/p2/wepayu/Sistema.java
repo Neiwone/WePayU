@@ -12,13 +12,13 @@ import java.util.UUID;
 
 public class Sistema {
 
-    private Database instance;
+    private final Database instance;
 
     public Sistema() throws IOException {
-        instance = Database.getInstance();;
+        instance = Database.getInstance();
     }
 
-    public void clear() throws IOException {
+    public void clear() {
         instance.clear();
     }
 
@@ -37,7 +37,7 @@ public class Sistema {
         }
         else if(type.equals("assalariado")) {
             //  Cria e adiciona o novo empregado do tipo assalariado.
-            EmpregadoAssalariado novoEmpregadoAssalariado = new EmpregadoAssalariado(name, address, salary);
+            EmpregadoAssalariado novoEmpregadoAssalariado = new EmpregadoAssalariado(name, address, Double.parseDouble(salary.replace(',', '.')));
             instance.addEmpregado(novoEmpregadoAssalariado);
             return novoEmpregadoAssalariado.getId();
         }
@@ -46,7 +46,7 @@ public class Sistema {
 
     }
 
-    public String createNewEmployee(String name, String address, String type, String salary, String commission) throws Exception {
+    public String createNewEmployee(String name, String address, String type, String salary, String commission) {
 
         String id = UUID.randomUUID().toString();
 
@@ -64,8 +64,8 @@ public class Sistema {
             case "nome"             -> employee.getNome();
             case "endereco"         -> employee.getEndereco();
             case "tipo"             -> employee.getTipo();
-            case "salario"          -> employee.getSalario();
-            case "comissao"         -> ((EmpregadoComissionado) employee).getComissao();
+            case "salario"          -> String.format("%.2f", employee.getSalario()).replace('.', ',');
+            case "comissao"         -> String.format("%.2f", ((EmpregadoComissionado) employee).getComissao()).replace('.', ',');
             case "sindicalizado"    -> employee.getSindicalizado();
             case "metodoPagamento"  -> employee.getMetodo();
             case "banco"            -> ((Banco) employee.getMetodoPagamento()).getBanco();
@@ -197,19 +197,13 @@ public class Sistema {
                 if (value.equals("assalariado"))
                     changeEmployeeTypeToAssalariado(employeeID);
             }
-            case "salario" -> {
-                if (employee.getTipo().equals("assalariado"))
-                    ((EmpregadoAssalariado) employee).setSalarioMensal(value);
-                else if (employee.getTipo().equals("horista"))
-                    ((EmpregadoHorista) employee).setSalarioPorHora(value);
-                else if (employee.getTipo().equals("comissionado"))
-                    ((EmpregadoComissionado) employee).setSalarioMensal(value);
-            }
+            case "salario" -> employee.setSalario(Double.valueOf(value.replace(',', '.')));
+
             case "sindicalizado" -> {
                 if (!Boolean.parseBoolean(value))
                     employee.setMembroSindicado(null);
             }
-            case "comissao" -> ((EmpregadoComissionado) employee).setComissao(value);
+            case "comissao" -> ((EmpregadoComissionado) employee).setComissao(Double.valueOf(value.replace(',', '.')));
             case "metodoPagamento" -> {
                 MetodoPagamento novoMetodo = employee.getMetodoPagamento();
                 if (value.equals("correios"))
@@ -274,7 +268,7 @@ public class Sistema {
 
     }
 
-    public void changeEmployeeInfo(String employeeID, String atributo, String valor1, String banco, String agencia, String contaCorrente) throws Exception {
+    public void changeEmployeeInfo(String employeeID, String atributo, String valor1, String banco, String agencia, String contaCorrente) {
 
         if(atributo.equals("metodoPagamento") && valor1.equals("banco"))
             instance.getEmpregado(employeeID).setMetodoPagamento(new Banco(banco, agencia, contaCorrente));
@@ -326,7 +320,7 @@ public class Sistema {
 
         Empregado employee = instance.getEmpregado(employeeID);
 
-        employee = new EmpregadoAssalariado(employee.getId(), employee.getNome(), employee.getEndereco(), salary);
+        employee = new EmpregadoAssalariado(employee.getId(), employee.getNome(), employee.getEndereco(), Double.parseDouble(salary.replace(',', '.')));
 
         removeEmployee(employeeID);
         instance.addEmpregado(employeeID, employee);
@@ -346,7 +340,7 @@ public class Sistema {
 
         Empregado employee = instance.getEmpregado(employeeID);
 
-        employee = new EmpregadoComissionado(employee.getId(), employee.getNome(), employee.getEndereco(), employee.getSalario(), comissao);
+        employee = new EmpregadoComissionado(employee.getId(), employee.getNome(), employee.getEndereco(), String.valueOf(employee.getSalario()), comissao);
 
         removeEmployee(employeeID);
         instance.addEmpregado(employeeID, employee);
@@ -356,7 +350,7 @@ public class Sistema {
 
         Empregado employee = instance.getEmpregado(employeeID);
 
-        employee = new EmpregadoComissionado(employee.getId(), employee.getNome(), employee.getEndereco(), employee.getSalario(), null);
+        employee = new EmpregadoComissionado(employee.getId(), employee.getNome(), employee.getEndereco(), String.valueOf(employee.getSalario()), null);
 
         removeEmployee(employeeID);
         instance.addEmpregado(employeeID, employee);

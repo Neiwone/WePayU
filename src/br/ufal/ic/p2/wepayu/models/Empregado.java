@@ -5,23 +5,22 @@ import java.util.UUID;
 
 public abstract class Empregado implements Serializable {
 
+    protected String id;
     protected String nome;
     protected String endereco;
+    protected Double salario;
     protected MembroSindicado membroSindicado;
-    protected String id;
     protected MetodoPagamento metodoPagamento;
 
-
+    // Constructors //
     public Empregado() {
     }
-
     public Empregado(String nome, String endereco) {
         setId(id = UUID.randomUUID().toString());
         this.nome = nome;
         this.endereco = endereco;
         this.metodoPagamento = new EmMaos();
     }
-
     public Empregado(String id, String nome, String endereco) {
         this.id = id;
         this.nome = nome;
@@ -30,65 +29,72 @@ public abstract class Empregado implements Serializable {
     }
 
 
+    // Getter & Setter - Tipo //
 
+    public abstract String getTipo();
 
+    // Getter & Setter - ID //
+
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    // Getter & Setter - Nome //
+
+    public String getNome() {
+        return nome;
+    }
     public void setNome(String nome) {
         this.nome = nome;
+    }
+
+    // Getter & Setter - Endereço //
+
+    public String getEndereco() {
+        return endereco;
     }
     public void setEndereco(String endereco) {
         this.endereco = endereco;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    // Getter & Setter - Salario //
+
+    public abstract Double getSalario();
+    public void setSalario(Double salario) {
+        this.salario = salario;
     }
 
-    public boolean getSindicalizado() {
-        return (membroSindicado != null);
-    }
-
-
-
+    // Getter & Setter - Membro Sindicato //
 
     public MembroSindicado getMembroSindicado() {
         return membroSindicado;
     }
-
     public void setMembroSindicado(MembroSindicado membroSindicado) {
         this.membroSindicado = membroSindicado;
     }
 
-    public String getMetodo() {
-        return metodoPagamento.getTipo();
+    // Getter & Setter - Metodo de Pagamento //
+    public void setMetodoPagamento(MetodoPagamento metodoPagamento) {
+        this.metodoPagamento = metodoPagamento;
     }
 
     public MetodoPagamento getMetodoPagamento() {
         return metodoPagamento;
     }
 
-    public void setMetodoPagamento(MetodoPagamento metodoPagamento) {
-        this.metodoPagamento = metodoPagamento;
+
+
+
+    public boolean getSindicalizado() {
+        return (membroSindicado != null);
     }
 
-
-
-    public String getNome() {
-        return nome;
+    public String getMetodo() {
+        return metodoPagamento.getTipo();
     }
-
-    public String getEndereco() {
-        return endereco;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-
-
-    public abstract String getSalario();
-
-    public abstract String getTipo();
 
 
 

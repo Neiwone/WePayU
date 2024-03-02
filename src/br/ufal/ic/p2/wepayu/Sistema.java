@@ -370,7 +370,7 @@ public class Sistema {
             }
             case "comissionado" -> {
                 double sales = Double.parseDouble(getSales(employee.getId(), localDate.minusDays(13), localDate).replace(',', '.'));
-                return (Math.floor(employee.getSalario() * 24D/52D * 100)/100F + Math.floor((sales * ((EmpregadoComissionado) employee).getComissao()) * 100)/100F);
+                return (Math.floor(employee.getSalario() * 24D/52D * 100)/100D + Math.floor((sales * ((EmpregadoComissionado) employee).getComissao()) * 100)/100D);
             }
         }
         return 0.0;
@@ -457,11 +457,18 @@ public class Sistema {
                 Double descontos = 0D;
                 if (employee.getSindicalizado())
                     descontos = (employee.getMembroSindicado().getTaxaSindical() * 7) + Double.parseDouble(getTotalPriceForTaxes(employee.getId(), initialDate, localDate).replace(',', '.'));
-                totalh.set(3, totalh.get(3) + descontos);
+                descontos += ((EmpregadoHorista) employee).getAcumuladodescontos();
 
                 String salarioliquido = "0,00";
-                if (descontos < salariobruto)
+                if (descontos < salariobruto) {
                     salarioliquido = String.format("%.2f", salariobruto - descontos).replace('.', ',');
+                    ((EmpregadoHorista) employee).setAcumuladodescontos(0D);
+                }
+                else {
+                    ((EmpregadoHorista) employee).setAcumuladodescontos(descontos);
+                    descontos = 0D;
+                }
+                totalh.set(3, totalh.get(3) + descontos);
                 totalh.set(4, totalh.get(4) + Double.parseDouble(salarioliquido.replace(',','.')));
                 String metodo = "";
                 MetodoPagamento pagamento = employee.getMetodoPagamento();
@@ -499,13 +506,13 @@ public class Sistema {
         List<Double> totala = Arrays.asList(0D,0D,0D);
         for(Map.Entry<String, Empregado> employees: sortedEmployees.entrySet()) {
             Empregado employee = employees.getValue();
-            if (employee.getTipo().equals("assalariados") && localDate == localDate.with(TemporalAdjusters.lastDayOfMonth())) {
+            if (employee.getTipo().equals("assalariado") && localDate == localDate.with(TemporalAdjusters.lastDayOfMonth())) {
                 String nome = employee.getNome();
                 Double salariobruto = getRawSalary(employee, localDate);
                 totala.set(0, totala.get(0) + salariobruto);
                 Double descontos = 0D;
                 if (employee.getSindicalizado())
-                    descontos = (employee.getMembroSindicado().getTaxaSindical() * localDate.lengthOfMonth()) + Double.parseDouble(getTotalPriceForTaxes(employee.getId(), initialDate, localDate).replace(',', '.'));
+                    descontos = (employee.getMembroSindicado().getTaxaSindical() * localDate.lengthOfMonth()) + Double.parseDouble(getTotalPriceForTaxes(employee.getId(), LocalDate.of(localDate.getYear(),localDate.getMonth(), 1), localDate).replace(',', '.'));
                 totala.set(1, totala.get(1) + descontos);
 
                 String salarioliquido = "0,00";
@@ -550,17 +557,17 @@ public class Sistema {
             Empregado employee = employees.getValue();
             if (employee.getTipo().equals("comissionado") && ((ChronoUnit.DAYS.between(LocalDate.of(2005,1,1), localDate)) + 1) % 14 == 0) {
                 String nome = employee.getNome();
-                Double salariofixo = (employee.getSalario() * 24/52);
+                Double salariofixo = Math.floor((employee.getSalario() * 24D/52D)*100)/100d;
                 totalc.set(0, totalc.get(0) + salariofixo);
                 String vendas = getSales(employee.getId(), initialDate, localDate);
                 totalc.set(1, totalc.get(1) + Double.parseDouble(vendas.replace(',', '.')));
-                Double comissao = ((EmpregadoComissionado) employee).getComissao() * Double.parseDouble(vendas.replace(',', '.'));
+                Double comissao = Math.floor((((EmpregadoComissionado) employee).getComissao() * Double.parseDouble(vendas.replace(',', '.')))*100)/100D;
                 totalc.set(2, totalc.get(2) + comissao);
                 Double salariobruto = getRawSalary(employee, localDate);
                 totalc.set(3, totalc.get(3) + salariobruto);
                 Double descontos = 0D;
                 if (employee.getSindicalizado())
-                    descontos = (employee.getMembroSindicado().getTaxaSindical() * localDate.lengthOfMonth()) + Double.parseDouble(getTotalPriceForTaxes(employee.getId(), initialDate, localDate).replace(',', '.'));
+                    descontos = (employee.getMembroSindicado().getTaxaSindical() * 14) + Double.parseDouble(getTotalPriceForTaxes(employee.getId(), initialDate, localDate).replace(',', '.'));
                 totalc.set(4, totalc.get(4) + descontos);
 
                 String salarioliquido = "0,00";

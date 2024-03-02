@@ -5,7 +5,18 @@ import java.util.ArrayList;
 public class EmpregadoHorista extends Empregado implements Serializable {
     public ArrayList<CartaoDePonto> cartao;
 
+    public Double getAcumuladodescontos() {
+        return acumuladodescontos;
+    }
+
+    public void setAcumuladodescontos(Double acumuladodescontos) {
+        this.acumuladodescontos = acumuladodescontos;
+    }
+
+    private Double acumuladodescontos;
+
     public EmpregadoHorista() {
+        this.acumuladodescontos = 0D;
     }
 
 
@@ -21,12 +32,14 @@ public class EmpregadoHorista extends Empregado implements Serializable {
         super(id, nome, endereco);
         this.salario = salario;
         this.cartao = new ArrayList<>();
+        this.acumuladodescontos = 0D;
     }
 
     public EmpregadoHorista(String nome, String endereco, Double salario) {
         super(nome, endereco);
         this.salario = salario;
         this.cartao = new ArrayList<>();
+        this.acumuladodescontos = 0D;
     }
 
 

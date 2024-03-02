@@ -29,6 +29,8 @@ public class EmpregadoHorista extends Empregado implements Serializable {
         this.cartao = new ArrayList<>();
     }
 
+
+
     public String getTipo() {
         return "horista";
     }

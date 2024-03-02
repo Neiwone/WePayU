@@ -3,15 +3,15 @@ package br.ufal.ic.p2.wepayu;
 import br.ufal.ic.p2.wepayu.models.*;
 
 import java.io.*;
+import java.text.DecimalFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Sistema {
 
@@ -369,10 +369,8 @@ public class Sistema {
                 return (workedHours + (extraWorkedHours * 1.5)) * employee.getSalario();
             }
             case "comissionado" -> {
-                Double sales = Double.valueOf(getSales(employee.getId(),  localDate.minusDays(13), localDate).replace(',', '.'));
-                System.out.println(employee.getNome());
-                System.out.println(sales);
-                return employee.getSalario() + sales;
+                double sales = Double.parseDouble(getSales(employee.getId(), localDate.minusDays(13), localDate).replace(',', '.'));
+                return (Math.floor(employee.getSalario() * 24D/52D * 100)/100F + Math.floor((sales * ((EmpregadoComissionado) employee).getComissao()) * 100)/100F);
             }
         }
         return 0.0;
@@ -382,7 +380,7 @@ public class Sistema {
     public Double generateTotalPayroll(String date) throws Exception {
         Double totalToPay = 0.0;
         LocalDate localDate = getLocalDate(date);
-        for(Map.Entry<String, Empregado> employees: instance.getEmpregados().entrySet()){
+        for(Map.Entry<String, Empregado> employees: instance.getEmpregados().entrySet()) {
             Empregado employee = employees.getValue();
             switch (employee.getTipo())
             {
@@ -403,13 +401,199 @@ public class Sistema {
         return totalToPay;
     }
 
-    public void generatePayroll(String date, String file) {
 
+
+    public static boolean isInteger(double number) {
+        return number == (int) number;
+    }
+
+    // Formata o número com ou sem casas decimais
+    public static String formatNumber(double number) {
+        if (isInteger(number)) {
+            // Se for inteiro, formata sem casas decimais
+            return new DecimalFormat("#").format(number);
+        } else {
+            // Se não for inteiro, formata com duas casas decimais
+            return new DecimalFormat("#.##").format(number).replace('.',',');
+        }
     }
 
 
 
+    public void generatePayroll(String date, String file) throws Exception {
+        LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("d/M/yyyy"));
+        localDate.format(DateTimeFormatter.ofPattern("yyyy-M-d"));
 
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+
+        writer.write("FOLHA DE PAGAMENTO DO DIA " + localDate);
+        writer.newLine();
+        writer.write("====================================\n");
+        writer.newLine();
+
+        writer.write(
+                """
+                        ===============================================================================================================================
+                        ===================== HORISTAS ================================================================================================
+                        ===============================================================================================================================
+                        Nome                                 Horas Extra Salario Bruto Descontos Salario Liquido Metodo
+                        ==================================== ===== ===== ============= ========= =============== ======================================
+                        """
+        );
+
+        LocalDate initialDate = localDate.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY));
+        LinkedHashMap<String, Empregado> sortedEmployees = instance.getEmpregados().entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.comparing(Empregado::getNome))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+        List<Double> totalh = Arrays.asList(0D,0D,0D,0D,0D);
+        for(Map.Entry<String, Empregado> employees: sortedEmployees.entrySet()) {
+            Empregado employee = employees.getValue();
+            if (employee.getTipo().equals("horista") && localDate.getDayOfWeek().equals(DayOfWeek.FRIDAY)) {
+                String nome = employee.getNome();
+                String horastrabalhadas = getWorkedHours(employee.getId(), initialDate, localDate);
+                totalh.set(0, totalh.get(0) + Double.parseDouble(horastrabalhadas.replace(',', '.')));
+                String horasextrastrabalhadas = getExtraWorkedHours(employee.getId(), initialDate, localDate);
+                totalh.set(1, totalh.get(1) + Double.parseDouble(horasextrastrabalhadas.replace(',', '.')));
+                Double salariobruto = getRawSalary(employee, localDate);
+                totalh.set(2, totalh.get(2) + salariobruto);
+                Double descontos = 0D;
+                if (employee.getSindicalizado())
+                    descontos = (employee.getMembroSindicado().getTaxaSindical() * 7) + Double.parseDouble(getTotalPriceForTaxes(employee.getId(), initialDate, localDate).replace(',', '.'));
+                totalh.set(3, totalh.get(3) + descontos);
+
+                String salarioliquido = "0,00";
+                if (descontos < salariobruto)
+                    salarioliquido = String.format("%.2f", salariobruto - descontos).replace('.', ',');
+                totalh.set(4, totalh.get(4) + Double.parseDouble(salarioliquido.replace(',','.')));
+                String metodo = "";
+                MetodoPagamento pagamento = employee.getMetodoPagamento();
+                if(Objects.equals(pagamento.getTipo(), "emMaos"))
+                    metodo = "Em maos";
+                if(Objects.equals(pagamento.getTipo(), "banco"))
+                    metodo = String.format("%s, Ag. %s CC %s",
+                            ((Banco) pagamento).getBanco(),
+                            ((Banco) pagamento).getAgencia(),
+                            ((Banco) pagamento).getContaCorrente()
+                    );
+                if(Objects.equals(pagamento.getTipo(), "correios"))
+                    metodo = "Correios" + ", " + employee.getEndereco();
+
+
+                writer.write(String.format("%-36s %5s %5s %13s %9s %15s %s", nome, horastrabalhadas, horasextrastrabalhadas, String.format("%.2f", salariobruto).replace('.', ','), String.format("%.2f", descontos).replace('.', ','), salarioliquido, metodo));
+                writer.newLine();
+            }
+        }
+
+        writer.write(String.format("\n%-36s %5s %5s %13s %9s %15s\n", "TOTAL HORISTAS", formatNumber(totalh.get(0)), formatNumber(totalh.get(1)), String.format("%.2f", totalh.get(2)).replace('.',','), String.format("%.2f", totalh.get(3)).replace('.',','), String.format("%.2f", totalh.get(4)).replace('.',',')));
+        writer.newLine();
+
+
+        writer.write(
+                """
+                        ===============================================================================================================================
+                        ===================== ASSALARIADOS ============================================================================================
+                        ===============================================================================================================================
+                        Nome                                             Salario Bruto Descontos Salario Liquido Metodo\s
+                        ================================================ ============= ========= =============== ======================================
+                        """
+        );
+
+        List<Double> totala = Arrays.asList(0D,0D,0D);
+        for(Map.Entry<String, Empregado> employees: sortedEmployees.entrySet()) {
+            Empregado employee = employees.getValue();
+            if (employee.getTipo().equals("assalariados") && localDate == localDate.with(TemporalAdjusters.lastDayOfMonth())) {
+                String nome = employee.getNome();
+                Double salariobruto = getRawSalary(employee, localDate);
+                totala.set(0, totala.get(0) + salariobruto);
+                Double descontos = 0D;
+                if (employee.getSindicalizado())
+                    descontos = (employee.getMembroSindicado().getTaxaSindical() * localDate.lengthOfMonth()) + Double.parseDouble(getTotalPriceForTaxes(employee.getId(), initialDate, localDate).replace(',', '.'));
+                totala.set(1, totala.get(1) + descontos);
+
+                String salarioliquido = "0,00";
+                if (descontos < salariobruto)
+                    salarioliquido = String.format("%.2f", salariobruto - descontos).replace('.', ',');
+                totala.set(2, totala.get(2) + Double.parseDouble(salarioliquido.replace(',','.')));
+                String metodo = "";
+                MetodoPagamento pagamento = employee.getMetodoPagamento();
+                if(Objects.equals(pagamento.getTipo(), "emMaos"))
+                    metodo = "Em maos";
+                if(Objects.equals(pagamento.getTipo(), "banco"))
+                    metodo = String.format("%s, Ag. %s CC %s",
+                            ((Banco) pagamento).getBanco(),
+                            ((Banco) pagamento).getAgencia(),
+                            ((Banco) pagamento).getContaCorrente()
+                    );
+                if(Objects.equals(pagamento.getTipo(), "correios"))
+                    metodo = "Correios" + ", " + employee.getEndereco();
+
+
+                writer.write(String.format("%-48s %13s %9s %15s %s", nome, String.format("%.2f", salariobruto).replace('.', ','), String.format("%.2f", descontos).replace('.', ','), salarioliquido, metodo));
+                writer.newLine();
+            }
+        }
+
+        writer.write(String.format("\n%-48s %13s %9s %15s\n", "TOTAL ASSALARIADOS", String.format("%.2f",totala.get(0)).replace('.', ','), String.format("%.2f",totala.get(1)).replace('.', ','), String.format("%.2f", totala.get(2)).replace('.',',')));
+        writer.newLine();
+
+
+        writer.write(
+                """
+                        ===============================================================================================================================
+                        ===================== COMISSIONADOS ===========================================================================================
+                        ===============================================================================================================================
+                        Nome                  Fixo     Vendas   Comissao Salario Bruto Descontos Salario Liquido Metodo\s
+                        ===================== ======== ======== ======== ============= ========= =============== ======================================
+                        """
+        );
+        initialDate = localDate.minusDays(13);
+        List<Double> totalc = Arrays.asList(0D,0D,0D,0D,0D,0D);
+        for(Map.Entry<String, Empregado> employees: sortedEmployees.entrySet()) {
+            Empregado employee = employees.getValue();
+            if (employee.getTipo().equals("comissionado") && ((ChronoUnit.DAYS.between(LocalDate.of(2005,1,1), localDate)) + 1) % 14 == 0) {
+                String nome = employee.getNome();
+                Double salariofixo = (employee.getSalario() * 24/52);
+                totalc.set(0, totalc.get(0) + salariofixo);
+                String vendas = getSales(employee.getId(), initialDate, localDate);
+                totalc.set(1, totalc.get(1) + Double.parseDouble(vendas.replace(',', '.')));
+                Double comissao = ((EmpregadoComissionado) employee).getComissao() * Double.parseDouble(vendas.replace(',', '.'));
+                totalc.set(2, totalc.get(2) + comissao);
+                Double salariobruto = getRawSalary(employee, localDate);
+                totalc.set(3, totalc.get(3) + salariobruto);
+                Double descontos = 0D;
+                if (employee.getSindicalizado())
+                    descontos = (employee.getMembroSindicado().getTaxaSindical() * localDate.lengthOfMonth()) + Double.parseDouble(getTotalPriceForTaxes(employee.getId(), initialDate, localDate).replace(',', '.'));
+                totalc.set(4, totalc.get(4) + descontos);
+
+                String salarioliquido = "0,00";
+                if (descontos < salariobruto)
+                    salarioliquido = String.format("%.2f", salariobruto - descontos).replace('.', ',');
+                totalc.set(5, totalc.get(5) + Double.parseDouble(salarioliquido.replace(',','.')));
+                String metodo = "";
+                MetodoPagamento pagamento = employee.getMetodoPagamento();
+                if(Objects.equals(pagamento.getTipo(), "emMaos"))
+                    metodo = "Em maos";
+                if(Objects.equals(pagamento.getTipo(), "banco"))
+                    metodo = String.format("%s, Ag. %s CC %s",
+                            ((Banco) pagamento).getBanco(),
+                            ((Banco) pagamento).getAgencia(),
+                            ((Banco) pagamento).getContaCorrente()
+                    );
+                if(Objects.equals(pagamento.getTipo(), "correios"))
+                    metodo = "Correios" + ", " + employee.getEndereco();
+
+
+                writer.write(String.format("%-21s %8s %8s %8s %13s %9s %15s %s", nome, String.format("%.2f", salariofixo).replace('.', ','), vendas, String.format("%.2f", comissao).replace('.', ','), String.format("%.2f", salariobruto).replace('.', ','), String.format("%.2f", descontos).replace('.', ','), salarioliquido, metodo));
+                writer.newLine();
+            }
+        }
+
+        writer.write(String.format("\n%-21s %8s %8s %8s %13s %9s %15s\n", "TOTAL COMISSIONADOS", String.format("%.2f",totalc.get(0)).replace('.', ','), String.format("%.2f",totalc.get(1)).replace('.', ','), String.format("%.2f", totalc.get(2)).replace('.',','), String.format("%.2f", totalc.get(3)).replace('.',','), String.format("%.2f", totalc.get(4)).replace('.',','), String.format("%.2f", totalc.get(5)).replace('.',',')));
+        writer.newLine();
+
+        writer.write(String.format("TOTAL FOLHA: %.2f", generateTotalPayroll(date)).replace('.',','));
+        writer.newLine();
+        writer.close();
+
+    }
 
 
 }

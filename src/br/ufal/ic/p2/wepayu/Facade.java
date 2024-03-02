@@ -362,8 +362,8 @@ public class Facade {
         return String.format("%.2f", sistema.generateTotalPayroll(data)).replace('.', ',');
     }
 
-    public void rodaFolha(String data, String saida) {
-
+    public void rodaFolha(String data, String saida) throws Exception {
+        sistema.generatePayroll(data, saida);
     }
 
 

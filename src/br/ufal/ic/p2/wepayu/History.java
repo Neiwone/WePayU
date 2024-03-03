@@ -1,5 +1,9 @@
 package br.ufal.ic.p2.wepayu;
 
+/*
+     authors: Neiwone & rafaellucian0 on GitHub
+ */
+
 import java.util.Stack;
 
 public class History {

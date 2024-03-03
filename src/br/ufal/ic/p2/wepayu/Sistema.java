@@ -1,5 +1,9 @@
 package br.ufal.ic.p2.wepayu;
 
+/*
+     authors: Neiwone & rafaellucian0 on GitHub
+ */
+
 import br.ufal.ic.p2.wepayu.models.*;
 
 import java.io.BufferedWriter;
@@ -20,21 +24,26 @@ public class Sistema {
     private final Database instance;
     private final History history = new History();
 
+    // Todas as
 
     public Sistema() throws IOException {
         instance = Database.getInstance();
         history.push(new Memento(instance.getEmpregados()));
     }
 
+    // Limpa todos os dados temporarios do sistema.
     public void clear() {
         instance.clear();
         history.push(new Memento(instance.getEmpregados()));
     }
 
+    // Salva o HashMap de Empregados e a lista de possíveis pagamentos num arquivo .xml.
+    // (Persistencia)
     public void save() throws IOException {
         instance.saveToXML();
     }
 
+    // Cria um novo empregado ('horista' ou 'assalariado') e adiciona ele na HashMap de Empregados.
     public String createNewEmployee(String name, String address, String type ,String salary) throws Exception {
 
         //  Checa qual o tipo do novo empregado.
@@ -56,6 +65,7 @@ public class Sistema {
             throw new Exception("Tipo invalido.");
     }
 
+    // Cria um novo empregado ('comissionado') e adiciona ele na HashMap de Empregados.
     public String createNewEmployee(String name, String address, String type, String salary, String commission) {
 
         String id = UUID.randomUUID().toString();
@@ -67,6 +77,7 @@ public class Sistema {
 
     }
 
+    // Retorna o valor de um atributo do empregado desejado.
     public Object getEmployeeAttribute(String employeeID, String attribute) throws Exception {
 
         Empregado employee = instance.getEmpregado(employeeID);
@@ -92,6 +103,7 @@ public class Sistema {
 
     }
 
+    // Retorna o ID de um empregado com nome desejado, index informa se o empregado desejado é o primeiro, segundo, ...
     public String getEmployeeByName(String name, int index) throws Exception {
         int i = 1;
         for (Map.Entry<String, Empregado> entry : instance.getEmpregados().entrySet()) {
@@ -107,11 +119,13 @@ public class Sistema {
         throw new Exception("Nao ha empregado com esse nome.");
     }
 
+    // Remove um empregado da nossa HashMap usando o método .remove.
     public void removeEmployee(String employeeID) {
         instance.removeEmpregado(employeeID);
         history.push(new Memento(instance.getEmpregados()));
     }
 
+    // Retorna um LocalDate que corresponde a data passada como parametro na forma de String.
     public static LocalDate getLocalDate(String date) throws Exception {
 
         try {
@@ -122,6 +136,7 @@ public class Sistema {
 
     }
 
+    // Retorna as horas trabalhadas por um empregado.
     public String getWorkedHours(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
 
         if (initialDate.isAfter(finalDate))
@@ -141,6 +156,7 @@ public class Sistema {
         return Integer.toString((int) horasAcumuladas);
     }
 
+    // Retorna as horas extras trabalhadas por um empregado.
     public String getExtraWorkedHours(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
 
         if (initialDate.isAfter(finalDate))
@@ -160,6 +176,7 @@ public class Sistema {
         return Double.toString(horasAcumuladas).replace(".", ",");
     }
 
+    // Retorna os registros de vendas realizadas por um empregado.
     public String getSales(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
 
         if (initialDate.isAfter(finalDate))
@@ -177,6 +194,7 @@ public class Sistema {
         return String.format("%.2f", valorTotal).replace(".", ",");
     }
 
+    // Retorna o valor a ser descontado de um empregado, com base nas taxas do MembroSindicato.
     public String getTotalPriceForTaxes(String employeeID, LocalDate initialDate, LocalDate finalDate) throws Exception {
 
         if (initialDate.isAfter(finalDate))
@@ -195,6 +213,7 @@ public class Sistema {
         return String.format("%.2f", taxaTotal).replace(".", ",");
     }
 
+    // Muda um atributo de um empregado para <value>.
     public void changeAttribute(String employeeID, String attribute, String value) throws Exception {
 
         Empregado employee = instance.getEmpregado(employeeID);
@@ -242,6 +261,7 @@ public class Sistema {
         history.push(new Memento(instance.getEmpregados()));
     }
 
+    // Checa se algum empregado possui aquele idSindicato.
     private boolean doesThisIDExists(String idSindicato) {
         for(Map.Entry<String, Empregado> entry: instance.getEmpregados().entrySet()) {
             Empregado empregado = entry.getValue();
@@ -253,16 +273,19 @@ public class Sistema {
         return false;
     }
 
+    // Adiciona um cartão de ponto para aquele empregado.
     public void addNewPointCard(String employeeID, CartaoDePonto cartao) {
         ((EmpregadoHorista) instance.getEmpregado(employeeID)).cartao.add(cartao);
         history.push(new Memento(instance.getEmpregados()));
     }
 
+    // Adiciona um resultado de venda para aquele empregado.
     public void addNewSale(String employeeID, ResultadoDeVenda venda) {
         ((EmpregadoComissionado) instance.getEmpregado(employeeID)).vendas.add(venda);
         history.push(new Memento(instance.getEmpregados()));
     }
 
+    // Adiciona uma taxa de serviço na lista de taxas de um MembroSindicato.
     public void addServiceTax(String SyndicateID, String date, String value) throws Exception {
         for (Map.Entry<String, Empregado> entry: instance.getEmpregados().entrySet()) {
             Empregado empregado = entry.getValue();
@@ -282,6 +305,7 @@ public class Sistema {
         throw new Exception("Membro nao existe.");
     }
 
+    // Muda informações sobre MembroSindicato de um empregado.
     public void changeEmployeeInfo(String employeeID, String attribute, String value, String idSindicato, String taxaSindical) throws Exception {
         if(attribute.equals("sindicalizado") && value.equals("true")) {
             if (doesThisIDExists(idSindicato))
@@ -297,6 +321,7 @@ public class Sistema {
 
     }
 
+    // Muda informações sobre MetodoPagamento de um empregado.
     public void changeEmployeeInfo(String employeeID, String atributo, String valor1, String banco, String agencia, String contaCorrente) {
 
         if(atributo.equals("metodoPagamento") && valor1.equals("banco")) {
@@ -306,7 +331,7 @@ public class Sistema {
 
     }
 
-
+    // Muda o tipo de um empregado.
     public void changeEmployeesType(String emp, String atributo, String valor, String comissao) throws Exception {
         if (atributo.equals("tipo")) {
             switch (valor) {
@@ -319,10 +344,7 @@ public class Sistema {
         }
     }
 
-
-
-
-
+    // Muda o tipo do empregado para Horista, com o salario definido pelo parametro.
     private void changeEmployeeTypeToHorista(String employeeID, String salary) {
 
         Empregado employee = instance.getEmpregado(employeeID);
@@ -333,6 +355,7 @@ public class Sistema {
         instance.addEmpregado(employeeID, employee);
     }
 
+    // Muda o tipo do empregado para Horista.
     private void changeEmployeeTypeToHorista(String employeeID) {
 
         Empregado employee = instance.getEmpregado(employeeID);
@@ -343,6 +366,7 @@ public class Sistema {
         instance.addEmpregado(employeeID, employee);
     }
 
+    // Muda o tipo do empregado para Assalariado, com o salario definido pelo parametro.
     private void changeEmployeeTypeToAssalariado(String employeeID, String salary) {
 
         Empregado employee = instance.getEmpregado(employeeID);
@@ -353,6 +377,7 @@ public class Sistema {
         instance.addEmpregado(employeeID, employee);
     }
 
+    // Muda o tipo do empregado para Assalariado.
     private void changeEmployeeTypeToAssalariado(String employeeID) {
 
         Empregado employee = instance.getEmpregado(employeeID);
@@ -363,6 +388,7 @@ public class Sistema {
         instance.addEmpregado(employeeID, employee);
     }
 
+    // Muda o tipo do empregado para Comissionado, com o salario definido pelo parametro.
     private void changeEmployeeTypeToComissionado(String employeeID, String comissao) {
 
         Empregado employee = instance.getEmpregado(employeeID);
@@ -373,6 +399,7 @@ public class Sistema {
         instance.addEmpregado(employeeID, employee);
     }
 
+    // Muda o tipo do empregado para Comissionado.
     private void changeEmployeeTypeToComissionado(String employeeID) {
 
         Empregado employee = instance.getEmpregado(employeeID);
@@ -383,7 +410,7 @@ public class Sistema {
         instance.addEmpregado(employeeID, employee);
     }
 
-
+    // Retorna quanto aquele empregado deve receber em dado periodo de tempo.
     public Double getRawSalary(Empregado employee, LocalDate localDate) throws Exception {
         switch (employee.getTipo()) {
             case "assalariado" -> { return Math.floor(employee.getSalario() * (12D/52D * employee.getAgendaPagamento().getWeeks()) * 100)/100D; }
@@ -400,7 +427,7 @@ public class Sistema {
         return 0.0;
     }
 
-
+    // Não roda a folha de pagamento mas retorna o valor total caso rodasse.
     public Double generateTotalPayroll(String date) throws Exception {
         Double totalToPay = 0.0;
         LocalDate localDate = getLocalDate(date);
@@ -418,12 +445,12 @@ public class Sistema {
         return totalToPay;
     }
 
-
-
+    // Verifica se um número double é igual a ele inteiro.
     public static boolean isInteger(double number) {
         return number == (int) number;
     }
 
+    // Formata o número para ser exibido sem casas decimais.
     public static String formatNumber(double number) {
         if (isInteger(number)) {
             // Se for inteiro, formata sem casas decimais
@@ -434,6 +461,7 @@ public class Sistema {
         }
     }
 
+    // Roda a folha de pagamento, isto é gerar o <file>.txt correspondente a folha de pagamento.
     public void generatePayroll(String date, String file) throws Exception {
         LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("d/M/yyyy"));
         localDate.format(DateTimeFormatter.ofPattern("yyyy-M-d"));
@@ -470,7 +498,7 @@ public class Sistema {
                 totalh.set(2, totalh.get(2) + salariobruto);
                 Double descontos = 0D;
                 if (employee.getSindicalizado())
-                    descontos = (employee.getMembroSindicado().getTaxaSindical() * 7) + Double.parseDouble(getTotalPriceForTaxes(employee.getId(), initialDate, localDate).replace(',', '.'));
+                    descontos = (employee.getMembroSindicado().getTaxaSindical() * (employee.getAgendaPagamento().getWeeks() * 7)) + Double.parseDouble(getTotalPriceForTaxes(employee.getId(), initialDate, localDate).replace(',', '.'));
                 descontos += ((EmpregadoHorista) employee).getAcumuladodescontos();
 
                 String salarioliquido = "0,00";
@@ -559,7 +587,7 @@ public class Sistema {
                 totalc.set(3, totalc.get(3) + salariobruto);
                 Double descontos = 0D;
                 if (employee.getSindicalizado())
-                    descontos = (employee.getMembroSindicado().getTaxaSindical() * 14) + Double.parseDouble(getTotalPriceForTaxes(employee.getId(), initialDate, localDate).replace(',', '.'));
+                    descontos = (employee.getMembroSindicado().getTaxaSindical() * (employee.getAgendaPagamento().getWeeks() * 7)) + Double.parseDouble(getTotalPriceForTaxes(employee.getId(), initialDate, localDate).replace(',', '.'));
                 totalc.set(4, totalc.get(4) + descontos);
 
                 String salarioliquido = "0,00";
@@ -583,6 +611,7 @@ public class Sistema {
         history.push(new Memento(instance.getEmpregados()));
     }
 
+    // Retorna uma string formatada informando as informações do MetodoPagamento.
     private String getMetodoPagamentoToPayroll(Empregado employee) {
         String metodo = "";
         MetodoPagamento pagamento = employee.getMetodoPagamento();
@@ -599,22 +628,27 @@ public class Sistema {
         return metodo;
     }
 
+    // Retorna a quantidade atual de empregados no sistema.
     public int getNumberOfEmployees() {
         return instance.getEmpregados().size();
     }
 
+    // Desfaz uma ação
     public void undo() throws Exception {
         instance.setData(history.undo().restore());
     }
 
+    // Refaz uma ação que foi desfeita.
     public void redo() throws Exception {
         instance.setData(history.redo().restore());
     }
 
+    // Retorna a lista de possíveis pagamentos para a AgendaPagamento.
     public List<String> getListOfPaydays() {
         return instance.getListOfPaydays();
     }
 
+    // Adiciona um novo pagamento possível na lista.
     public void addPayday(String str) {
         instance.getListOfPaydays().add(str);
     }

@@ -1,5 +1,9 @@
 package br.ufal.ic.p2.wepayu.Exception;
 
+/*
+     authors: Neiwone & rafaellucian0 on GitHub
+ */
+
 // Class "InputCheck" to throw errors about facade-methods parameters.
 
 import br.ufal.ic.p2.wepayu.Database;
@@ -33,13 +37,7 @@ public class InputCheck extends Exception {
     /**
      * Input check for createEmployee method without commission variable.
      *
-     * @param name
-     * @param adreess
-     * @param type
-     * @param salary
-     * @throws Exception
      */
-
     public static void createEmployee(String name, String adreess, String type, String salary) throws Exception {
         if(name.isEmpty())
             throw new Exception("Nome nao pode ser nulo.");
@@ -60,12 +58,6 @@ public class InputCheck extends Exception {
 
     /**
      * Input check for createEmployee method with commission variable.
-     * @param name
-     * @param adreess
-     * @param type
-     * @param salary
-     * @param commission
-     * @throws Exception
      */
     public static void createEmployee(String name, String adreess, String type, String salary, String commission) throws Exception {
         if(name.isEmpty())
@@ -94,9 +86,6 @@ public class InputCheck extends Exception {
 
     /**
      * Input check for getEmployeeAttribute method.
-     * @param employeeID
-     * @param attribute
-     * @throws Exception
      */
     public static void getEmployeeAttribute(String employeeID, String attribute) throws Exception {
 
@@ -205,11 +194,11 @@ public class InputCheck extends Exception {
         int i = 0, day = 0, month = 0;
         for(String s : finalDate.split("/")) {
             if(i == 0) {
-                day = Integer.valueOf(s);
+                day = Integer.parseInt(s);
                 i++;
             }
             else if(i == 1) {
-                month = Integer.valueOf(s);
+                month = Integer.parseInt(s);
                 i++;
             }
         }
@@ -224,11 +213,11 @@ public class InputCheck extends Exception {
 
         for(String s : initialDate.split("/")) {
             if(i == 0) {
-                day = Integer.valueOf(s);
+                day = Integer.parseInt(s);
                 i++;
             }
             else if(i == 1) {
-                month = Integer.valueOf(s);
+                month = Integer.parseInt(s);
                 i++;
             }
         }

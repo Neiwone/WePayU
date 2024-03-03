@@ -1,7 +1,7 @@
 package br.ufal.ic.p2.wepayu.models;
 
 import java.io.Serializable;
-public class TaxaServico implements Serializable {
+public class TaxaServico implements Serializable, Cloneable {
     public String data;
     public Double valor;
 
@@ -27,5 +27,16 @@ public class TaxaServico implements Serializable {
 
     public Double getValor() {
         return valor;
+    }
+
+    @Override
+    public TaxaServico clone() {
+        try {
+            TaxaServico clone = (TaxaServico) super.clone();
+            // TODO: copy mutable state here, so the clone can't change the internals of the original
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

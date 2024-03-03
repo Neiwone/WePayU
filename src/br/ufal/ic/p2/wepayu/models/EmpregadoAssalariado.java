@@ -1,6 +1,6 @@
 package br.ufal.ic.p2.wepayu.models;
-import java.io.Serializable;
-public class EmpregadoAssalariado extends Empregado implements Serializable {
+
+public class EmpregadoAssalariado extends Empregado {
 
 
     public EmpregadoAssalariado() {
@@ -22,5 +22,10 @@ public class EmpregadoAssalariado extends Empregado implements Serializable {
 
     public Double getSalario() {
         return salario;
+    }
+
+    @Override
+    public EmpregadoAssalariado clone() {
+        return (EmpregadoAssalariado) super.clone();
     }
 }

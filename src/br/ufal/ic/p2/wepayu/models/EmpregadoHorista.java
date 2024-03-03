@@ -1,8 +1,7 @@
 package br.ufal.ic.p2.wepayu.models;
-import java.io.Serializable;
 import java.util.ArrayList;
 
-public class EmpregadoHorista extends Empregado implements Serializable {
+public class EmpregadoHorista extends Empregado  {
     public ArrayList<CartaoDePonto> cartao;
 
     public Double getAcumuladodescontos() {
@@ -50,5 +49,16 @@ public class EmpregadoHorista extends Empregado implements Serializable {
 
     public Double getSalario() {
         return salario;
+    }
+
+    @Override
+    public EmpregadoHorista clone() {
+        EmpregadoHorista clone = (EmpregadoHorista) super.clone();
+        clone.cartao = new ArrayList<>();
+        for (CartaoDePonto cartao: this.cartao) {
+            clone.cartao.add(cartao.clone());
+        }
+        // TODO: copy mutable state here, so the clone can't change the internals of the original
+        return clone;
     }
 }

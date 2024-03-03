@@ -1,11 +1,8 @@
 package br.ufal.ic.p2.wepayu.models;
 
-import br.ufal.ic.p2.wepayu.Sistema;
-
 import java.io.Serializable;
-import java.time.LocalDate;
 
-public class CartaoDePonto implements Serializable {
+public class CartaoDePonto implements Serializable, Cloneable {
 
     private String data;
 
@@ -33,5 +30,16 @@ public class CartaoDePonto implements Serializable {
 
     public Double getHoras() {
         return this.horas;
+    }
+
+    @Override
+    public CartaoDePonto clone() {
+        try {
+            CartaoDePonto clone = (CartaoDePonto) super.clone();
+            // TODO: copy mutable state here, so the clone can't change the internals of the original
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

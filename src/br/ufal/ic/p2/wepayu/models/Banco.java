@@ -1,8 +1,6 @@
 package br.ufal.ic.p2.wepayu.models;
 
-import java.io.Serializable;
-
-public class Banco extends MetodoPagamento  implements Serializable {
+public class Banco extends MetodoPagamento {
     private String banco;
     private String agencia;
     private String contaCorrente;

@@ -2,7 +2,7 @@ package br.ufal.ic.p2.wepayu.models;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class MembroSindicado implements Serializable {
+public class MembroSindicado implements Serializable, Cloneable {
     public String idMembro;
     public Double taxaSindical;
     public ArrayList<TaxaServico> taxa;
@@ -33,5 +33,19 @@ public class MembroSindicado implements Serializable {
 
     public Double getTaxaSindical() {
         return this.taxaSindical;
+    }
+
+    @Override
+    public MembroSindicado clone() {
+        try {
+            MembroSindicado clone = (MembroSindicado) super.clone();
+            clone.taxa = new ArrayList<>();
+            for (TaxaServico taxa : this.taxa) {
+                clone.taxa.add(taxa.clone());
+            }
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 public class Facade {
 
-    private final Sistema sistema;
+    private Sistema sistema;
     public Facade() throws IOException {
         sistema = new Sistema();
     }
@@ -366,6 +366,20 @@ public class Facade {
         sistema.generatePayroll(data, saida);
     }
 
+    public int getNumeroDeEmpregados() {
+        return sistema.getNumberOfEmployees();
+    }
+
+
+    public void undo() throws Exception {
+        if (this.sistema == null)
+            throw new Exception("Nao pode dar comandos depois de encerrarSistema.");
+        sistema.undo();
+    }
+
+    public void redo() throws Exception {
+        sistema.redo();
+    }
 
 
     /**
@@ -385,6 +399,7 @@ public class Facade {
      */
     public void encerrarSistema() throws IOException {
         sistema.save();
+        this.sistema = null;
     }
 
 

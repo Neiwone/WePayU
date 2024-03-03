@@ -2,7 +2,9 @@ package br.ufal.ic.p2.wepayu;
 
 import br.ufal.ic.p2.wepayu.models.*;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -16,13 +18,16 @@ import java.util.stream.Collectors;
 public class Sistema {
 
     private final Database instance;
+    private final History history = new History();
 
     public Sistema() throws IOException {
         instance = Database.getInstance();
+        history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
     }
 
     public void clear() {
         instance.clear();
+        history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
     }
 
     public void save() throws IOException {
@@ -36,17 +41,18 @@ public class Sistema {
             //  Cria e adiciona o novo empregado do tipo horista.
             EmpregadoHorista novoEmpregadoHorista = new EmpregadoHorista(name, address, Double.parseDouble(salary.replace(',', '.')));
             instance.addEmpregado(novoEmpregadoHorista);
+            history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
             return novoEmpregadoHorista.getId();
         }
         else if(type.equals("assalariado")) {
             //  Cria e adiciona o novo empregado do tipo assalariado.
             EmpregadoAssalariado novoEmpregadoAssalariado = new EmpregadoAssalariado(name, address, Double.parseDouble(salary.replace(',', '.')));
             instance.addEmpregado(novoEmpregadoAssalariado);
+            history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
             return novoEmpregadoAssalariado.getId();
         }
         else
             throw new Exception("Tipo invalido.");
-
     }
 
     public String createNewEmployee(String name, String address, String type, String salary, String commission) {
@@ -55,6 +61,7 @@ public class Sistema {
 
         EmpregadoComissionado novoEmpregadoComissionado = new EmpregadoComissionado(id, name, address, Double.parseDouble(salary.replace(',', '.')), Double.parseDouble(commission.replace(',', '.')));
         instance.addEmpregado(novoEmpregadoComissionado);
+        history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
         return novoEmpregadoComissionado.getId();
 
     }
@@ -100,6 +107,7 @@ public class Sistema {
 
     public void removeEmployee(String employeeID) {
         instance.removeEmpregado(employeeID);
+        history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
     }
 
     public static LocalDate getLocalDate(String date) throws Exception {
@@ -190,8 +198,12 @@ public class Sistema {
         Empregado employee = instance.getEmpregado(employeeID);
 
         switch (attribute) {
-            case "nome" -> employee.setNome(value);
-            case "endereco" -> employee.setEndereco(value);
+            case "nome" -> {
+                employee.setNome(value);
+            }
+            case "endereco" -> {
+                employee.setEndereco(value);
+            }
             case "tipo" -> {
                 if (value.equals("horista"))
                     changeEmployeeTypeToHorista(employeeID);
@@ -207,6 +219,7 @@ public class Sistema {
                     employee.setMembroSindicado(null);
             }
             case "comissao" -> ((EmpregadoComissionado) employee).setComissao(Double.valueOf(value.replace(',', '.')));
+
             case "metodoPagamento" -> {
                 MetodoPagamento novoMetodo = employee.getMetodoPagamento();
                 if (value.equals("correios"))
@@ -217,7 +230,9 @@ public class Sistema {
                 employee.setMetodoPagamento(novoMetodo);
             }
             default -> throw new Exception("Atributo nao existe.");
+
         }
+        history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
     }
 
     private boolean doesThisIDExists(String idSindicato) {
@@ -233,10 +248,12 @@ public class Sistema {
 
     public void addNewPointCard(String employeeID, CartaoDePonto cartao) {
         ((EmpregadoHorista) instance.getEmpregado(employeeID)).cartao.add(cartao);
+        history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
     }
 
     public void addNewSale(String employeeID, ResultadoDeVenda venda) {
         ((EmpregadoComissionado) instance.getEmpregado(employeeID)).vendas.add(venda);
+        history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
     }
 
     public void addServiceTax(String SyndicateID, String date, String value) throws Exception {
@@ -249,6 +266,7 @@ public class Sistema {
                             date,
                             Double.parseDouble(value.replace(",", ".")))
                     );
+                    history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
                     return;
                 }
             }
@@ -265,6 +283,7 @@ public class Sistema {
                 instance.getEmpregado(employeeID).setMembroSindicado(new MembroSindicado());
                 instance.getEmpregado(employeeID).getMembroSindicado().idMembro = idSindicato;
                 instance.getEmpregado(employeeID).getMembroSindicado().taxaSindical = Double.parseDouble(taxaSindical. replace(",","."));
+                history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
             }
         }
 
@@ -273,8 +292,10 @@ public class Sistema {
 
     public void changeEmployeeInfo(String employeeID, String atributo, String valor1, String banco, String agencia, String contaCorrente) {
 
-        if(atributo.equals("metodoPagamento") && valor1.equals("banco"))
+        if(atributo.equals("metodoPagamento") && valor1.equals("banco")) {
             instance.getEmpregado(employeeID).setMetodoPagamento(new Banco(banco, agencia, contaCorrente));
+            history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
+        }
 
     }
 
@@ -287,13 +308,9 @@ public class Sistema {
                 case "comissionado" -> changeEmployeeTypeToComissionado(emp, comissao);
                 default -> throw new Exception("tipo invalido.");
             }
+            history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
         }
     }
-
-
-
-
-
 
 
 
@@ -599,8 +616,19 @@ public class Sistema {
         writer.write(String.format("TOTAL FOLHA: %.2f", generateTotalPayroll(date)).replace('.',','));
         writer.newLine();
         writer.close();
-
+        history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
     }
 
 
+    public int getNumberOfEmployees() {
+        return instance.getEmpregados().size();
+    }
+
+    public void undo() throws Exception {
+        instance.setData((LinkedHashMap<String, Empregado>) history.undo().restore().clone());
+    }
+
+    public void redo() throws Exception {
+        instance.setData((LinkedHashMap<String, Empregado>) history.redo().restore().clone());
+    }
 }

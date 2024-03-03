@@ -8,10 +8,11 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class Database {
     private static Database instance;
-    private final LinkedHashMap<String, Empregado> empregados;
+    private LinkedHashMap<String, Empregado> empregados;
 
     private Database() throws IOException {
         //empregados = new LinkedHashMap<>();
@@ -26,6 +27,14 @@ public class Database {
         return instance;
     }
 
+    public void setData(LinkedHashMap<String, Empregado> empregadosSnapshot) {
+        this.empregados = new LinkedHashMap<>();
+
+        for (Map.Entry<String, Empregado> empregados : empregadosSnapshot.entrySet()) {
+            this.empregados.put(empregados.getKey(), empregados.getValue().clone());
+        }
+    }
+
     public void saveToXML() throws IOException {
         Files.createFile(Path.of("data.xml"));
         BufferedOutputStream file = new BufferedOutputStream(new FileOutputStream("data.xml"));
@@ -35,7 +44,7 @@ public class Database {
         e.close();
     }
 
-    private LinkedHashMap<String, Empregado> getFromXML() throws IOException {
+    private LinkedHashMap<String, Empregado> getFromXML() {
 
         BufferedInputStream file;
         try {file = new BufferedInputStream(new FileInputStream("data.xml"));}

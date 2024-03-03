@@ -3,7 +3,7 @@ package br.ufal.ic.p2.wepayu.models;
 import java.io.Serializable;
 import java.util.UUID;
 
-public abstract class Empregado implements Serializable {
+public abstract class Empregado implements Serializable, Cloneable {
 
     protected String id;
     protected String nome;
@@ -97,6 +97,17 @@ public abstract class Empregado implements Serializable {
     }
 
 
-
-
+    @Override
+    public Empregado clone() {
+        try {
+            Empregado clone = (Empregado) super.clone();
+            if (this.metodoPagamento != null)
+                clone.metodoPagamento = metodoPagamento.clone();
+            if (this.membroSindicado != null)
+                clone.membroSindicado = membroSindicado.clone();
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
 }

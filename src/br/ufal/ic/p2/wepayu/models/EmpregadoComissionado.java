@@ -1,8 +1,7 @@
 package br.ufal.ic.p2.wepayu.models;
-import java.io.Serializable;
 import java.util.ArrayList;
 
-public class EmpregadoComissionado extends Empregado implements Serializable {
+public class EmpregadoComissionado extends Empregado  {
 
 
     protected Double comissao;
@@ -50,5 +49,15 @@ public class EmpregadoComissionado extends Empregado implements Serializable {
 
     public Double getSalario() {
         return salario;
+    }
+
+    @Override
+    public EmpregadoComissionado clone() {
+        EmpregadoComissionado clone = (EmpregadoComissionado) super.clone();
+        clone.vendas = new ArrayList<>();
+        for (ResultadoDeVenda venda: this.vendas) {
+            clone.vendas.add(venda.clone());
+        }
+        return clone;
     }
 }

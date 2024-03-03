@@ -11,7 +11,7 @@ import java.util.List;
 
 public class InputCheck extends Exception {
 
-    private static Database instance;
+    private static final Database instance;
 
     static {
         try {
@@ -154,14 +154,18 @@ public class InputCheck extends Exception {
         if(!(instance.getEmpregado(employeeID).getTipo().equals("horista")))
             throw new Exception("Empregado nao eh horista.");
 
+        checkDate(initialDate, finalDate);
+    }
+
+    private static void checkDate(String initialDate, String finalDate) throws Exception {
         int i = 0, day = 0, month = 0;
         for(String s : finalDate.split("/")) {
             if(i == 0) {
-                day = Integer.valueOf(s);
+                day = Integer.parseInt(s);
                 i++;
             }
             else if(i == 1) {
-                month = Integer.valueOf(s);
+                month = Integer.parseInt(s);
                 i++;
             }
         }
@@ -176,11 +180,11 @@ public class InputCheck extends Exception {
 
         for(String s : initialDate.split("/")) {
             if(i == 0) {
-                day = Integer.valueOf(s);
+                day = Integer.parseInt(s);
                 i++;
             }
             else if(i == 1) {
-                month = Integer.valueOf(s);
+                month = Integer.parseInt(s);
                 i++;
             }
         }
@@ -242,41 +246,7 @@ public class InputCheck extends Exception {
         if(!instance.getEmpregado(employeeID).getSindicalizado())
             throw new Exception("Empregado nao eh sindicalizado.");
 
-        int i = 0, day = 0, month = 0;
-        for(String s : finalDate.split("/")) {
-            if(i == 0) {
-                day = Integer.valueOf(s);
-                i++;
-            }
-            else if(i == 1) {
-                month = Integer.valueOf(s);
-                i++;
-            }
-        }
-        if(day > 28 && month == 2)
-            throw new Exception("Data final invalida.");
-        if(day > 31 || month > 12)
-            throw new Exception("Data final invalida.");
-
-        i = 0;
-        day = 0;
-        month = 0;
-
-        for(String s : initialDate.split("/")) {
-            if(i == 0) {
-                day = Integer.valueOf(s);
-                i++;
-            }
-            else if(i == 1) {
-                month = Integer.valueOf(s);
-                i++;
-            }
-        }
-
-        if(day > 28 && month == 2)
-            throw new Exception("Data inicial invalida.");
-        if(day > 31 || month > 12)
-            throw new Exception("Data inicial invalida.");
+        checkDate(initialDate, finalDate);
     }
 
 

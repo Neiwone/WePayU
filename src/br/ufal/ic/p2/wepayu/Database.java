@@ -22,8 +22,7 @@ public class Database {
 
     private List<String> listOfPaydays;
 
-    private Database() throws IOException {
-        //empregados = new LinkedHashMap<>();
+    private Database() {
         getFromXML();
     }
 
@@ -67,8 +66,10 @@ public class Database {
 
         XMLDecoder d = new XMLDecoder(file);
 
-        empregados = (LinkedHashMap<String, Empregado>) d.readObject();
-        try { listOfPaydays = (List<String>) d.readObject();}
+        try { empregados = (LinkedHashMap<String, Empregado>) d.readObject(); }
+        catch (Exception e) { empregados = new LinkedHashMap<>(); }
+
+        try { listOfPaydays = (List<String>) d.readObject(); }
         catch (Exception e) {
             listOfPaydays = new ArrayList<>();
             listOfPaydays.add("semanal 5");

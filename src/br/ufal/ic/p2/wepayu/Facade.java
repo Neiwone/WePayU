@@ -169,7 +169,7 @@ public class Facade {
      */
     public String getHorasExtrasTrabalhadas(String emp, String dataInicial, String dataFinal) throws Exception {
 
-        // Check dos parametros para possiveis erros.
+        // Checa os parametros para possiveis erros.
         InputCheck.getWorkedHours(emp, dataInicial, dataFinal);
 
         //  Define a data inicial e a data final.
@@ -216,7 +216,7 @@ public class Facade {
      */
     public String getVendasRealizadas(String emp, String dataInicial, String dataFinal) throws Exception {
 
-        //  Check dos parametros para possiveis erros.
+        //  Checa os parametros para possiveis erros.
         InputCheck.getSales(emp, dataInicial, dataFinal);
 
         //  Define a data inicial e a data final.
@@ -240,7 +240,7 @@ public class Facade {
      */
     public String getTaxasServico (String emp, String dataInicial , String dataFinal) throws Exception {
 
-        // Check dos parametros para possiveis erros.
+        // Checa os parametros para possiveis erros.
         InputCheck.getTaxService(emp, dataInicial, dataFinal);
 
         //  Define a data inicial e a data final.
@@ -263,9 +263,10 @@ public class Facade {
      */
     public void lancaTaxaServico (String membro, String data, String valor) throws Exception {
 
-        // Check dos parametros para possiveis erros.
+        // Checa os parametros para possiveis erros.
         InputCheck.addTaxService(membro, data, valor);
 
+        // Adiciona nova taxa de serviço
         sistema.addServiceTax(membro, data, valor);
 
     }
@@ -284,7 +285,7 @@ public class Facade {
      */
     public void alteraEmpregado(String emp, String atributo, String valor1) throws Exception {
 
-        // Check dos parametros para possiveis erros.
+        // Checa os parametros para possiveis erros.
         InputCheck.changeEmployeeInfo(emp, atributo, valor1, null, null, null);
 
         // Muda o atributo do empregado para o valor1.
@@ -308,8 +309,10 @@ public class Facade {
      */
     public void alteraEmpregado(String emp, String atributo, String valor1, String idSindicato, String taxaSindical) throws Exception {
 
+        // Checa os parametros para possiveis erros.
         InputCheck.changeEmployeeInfo(emp, atributo, valor1, idSindicato, taxaSindical, null);
 
+        // Muda as informações correspondentes a um MembroSindicato.
         sistema.changeEmployeeInfo(emp,atributo, valor1, idSindicato, taxaSindical);
     }
 
@@ -331,9 +334,11 @@ public class Facade {
      */
     public void alteraEmpregado(String emp, String atributo, String valor1, String banco, String agencia, String contaCorrente) throws Exception {
 
+        // Checa os parametros para possiveis erros.
         InputCheck.changeEmployeeInfo(emp, atributo, valor1, banco, agencia, contaCorrente);
 
-        sistema.changeEmployeeInfo(emp,atributo, valor1, banco, agencia, contaCorrente);
+        // Muda as informações correspondentes a o MetodoPagamento de um empregado.
+        sistema.changeEmployeeInfo(emp, atributo, valor1, banco, agencia, contaCorrente);
     }
 
 
@@ -352,38 +357,88 @@ public class Facade {
      */
     public void alteraEmpregado(String emp, String atributo, String valor, String comissao) throws Exception {
 
+        // Checa os parametros para possiveis erros.
         InputCheck.changeEmployeeInfo(emp, atributo, valor, comissao, null, null);
 
+        // Muda o tipo do empregado.
         sistema.changeEmployeesType(emp, atributo, valor, comissao);
     }
 
 
+    /**
+     * Method responsible for returning payroll's total of a date.
+     * @param data date;
+     * @return total of that payroll;
+     * @throws Exception in case of an invalid date.
+     */
     public String totalFolha(String data) throws Exception {
+
+        // Retorna o total de uma folha de pagamento na forma de String.
         return String.format("%.2f", sistema.generateTotalPayroll(data)).replace('.', ',');
     }
 
+    /**
+     * Method responsible for creating payroll in a .txt file.
+     * @param data date;
+     * @param saida file name;
+     * @throws Exception in case of an invalid date.
+     */
     public void rodaFolha(String data, String saida) throws Exception {
+
+        // Gera <saida>.txt correspondente a folha de pagamento daquela data.
         sistema.generatePayroll(data, saida);
     }
 
+
+    /**
+     * Method that returns the current number of employees in the system.
+     * @return number of employees.
+     */
     public int getNumeroDeEmpregados() {
+
+        // Retorna o número atual de empregados no sistema.
         return sistema.getNumberOfEmployees();
     }
 
 
+    /**
+     * Method that undoes a change on our database.
+     * @throws Exception if there is no change to undo or the system is currently closed.
+     */
     public void undo() throws Exception {
+        // Checa se o sistema está fechado.
+        // (sistema fica fechado após ser executado encerrarSistema())
         if (this.sistema == null)
             throw new Exception("Nao pode dar comandos depois de encerrarSistema.");
+
+        // Desfaz uma acão.
+        // (isto é, restaurar a HashMap dos empregados para o estado antes da ação)
         sistema.undo();
     }
 
+
+    /**
+     * Method that redoes a change that was undone on our database.
+     * @throws Exception if there is no change to redo.
+     */
     public void redo() throws Exception {
+        // Resfaz uma acão.
+        // (isto é, restaurar a HashMap dos empregados para o estado antes do "undo")
         sistema.redo();
     }
 
+
+    /**
+     * Method that adds a new Payday that the employees now can choose as their payday.
+     * @param descricao payday;
+     * @throws Exception in case of an invalid payday.
+     */
     public void criarAgendaDePagamentos(String descricao) throws Exception {
+
+        // Checa dos parametros uma agenda de pagamento invalida.
         InputCheck.addNewPayday(descricao, sistema.getListOfPaydays());
 
+        // Adiciona a nova agenda de pagemento na lista de possíveis periodos de pagamento.
         sistema.addPayday(descricao);
     }
 
@@ -394,6 +449,7 @@ public class Facade {
      * @throws IOException in case the .xml file won't be found.
      */
     public void zerarSistema() throws IOException {
+        // Limpa os dados temporarios do sistema.
         sistema.clear();
     }
 
@@ -404,7 +460,9 @@ public class Facade {
      * @throws IOException in case the .xml file won't be found.
      */
     public void encerrarSistema() throws IOException {
+        // Salva os dados temporarios do sistema num arquivo "data.xml".
         sistema.save();
+        // Define o sistema como encerrado.
         this.sistema = null;
     }
 

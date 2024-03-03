@@ -24,7 +24,7 @@ public class MembroSindicado implements Serializable, Cloneable {
     }
 
     public MembroSindicado() {
-        this.taxa = new ArrayList<TaxaServico>();
+        this.taxa = new ArrayList<>();
     }
 
     public String getIdMembro() {

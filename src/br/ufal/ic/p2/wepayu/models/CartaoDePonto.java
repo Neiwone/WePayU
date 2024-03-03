@@ -35,8 +35,7 @@ public class CartaoDePonto implements Serializable, Cloneable {
     @Override
     public CartaoDePonto clone() {
         try {
-            CartaoDePonto clone = (CartaoDePonto) super.clone();
-            return clone;
+            return (CartaoDePonto) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }

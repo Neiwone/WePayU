@@ -381,6 +381,12 @@ public class Facade {
         sistema.redo();
     }
 
+    public void criarAgendaDePagamentos(String descricao) throws Exception {
+        InputCheck.addNewPayday(descricao, sistema.getListOfPaydays());
+
+        sistema.addPayday(descricao);
+    }
+
 
     /**
      * Method responsible for clearing the system, this means that all employees in our system are going to be erased.

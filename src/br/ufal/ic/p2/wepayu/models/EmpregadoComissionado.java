@@ -25,6 +25,8 @@ public class EmpregadoComissionado extends Empregado  {
         this.salario = salario;
         this.comissao = comissao;
         this.vendas = new ArrayList<>();
+        this.agendaPagamento = new AgendaPagamento();
+        this.agendaPagamento.setPeriodoPagamento("semanal 2 5");
     }
 
     public EmpregadoComissionado(String nome, String endereco, Double salario, Double comissao) {
@@ -32,6 +34,8 @@ public class EmpregadoComissionado extends Empregado  {
         this.salario = salario;
         this.comissao = comissao;
         this.vendas = new ArrayList<>();
+        this.agendaPagamento = new AgendaPagamento();
+        this.agendaPagamento.setPeriodoPagamento("semanal 2 5");
     }
 
     public void setComissao(Double comissao) {

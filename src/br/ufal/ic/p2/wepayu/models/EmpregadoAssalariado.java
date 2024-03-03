@@ -9,10 +9,14 @@ public class EmpregadoAssalariado extends Empregado {
     public EmpregadoAssalariado(String id, String nome, String endereco, Double salario) {
         super(id, nome, endereco);
         this.salario = salario;
+        this.agendaPagamento = new AgendaPagamento();
+        this.agendaPagamento.setPeriodoPagamento("mensal $");
     }
     public EmpregadoAssalariado(String nome, String endereco, Double salario) {
         super(nome, endereco);
         this.salario = salario;
+        this.agendaPagamento = new AgendaPagamento();
+        this.agendaPagamento.setPeriodoPagamento("mensal $");
     }
 
 

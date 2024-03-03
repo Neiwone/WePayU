@@ -10,7 +10,17 @@ public abstract class Empregado implements Serializable, Cloneable {
     protected String endereco;
     protected Double salario;
     protected MembroSindicado membroSindicado;
+
+    public AgendaPagamento getAgendaPagamento() {
+        return agendaPagamento;
+    }
+
+    public void setAgendaPagamento(AgendaPagamento agendaPagamento) {
+        this.agendaPagamento = agendaPagamento;
+    }
+
     protected MetodoPagamento metodoPagamento;
+    protected AgendaPagamento agendaPagamento;
 
     // Constructors //
     public Empregado() {
@@ -105,6 +115,8 @@ public abstract class Empregado implements Serializable, Cloneable {
                 clone.metodoPagamento = metodoPagamento.clone();
             if (this.membroSindicado != null)
                 clone.membroSindicado = membroSindicado.clone();
+            if (this.agendaPagamento != null)
+                clone.agendaPagamento = agendaPagamento.clone();
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();

@@ -4,14 +4,10 @@ package br.ufal.ic.p2.wepayu.Exception;
 
 import br.ufal.ic.p2.wepayu.Database;
 import br.ufal.ic.p2.wepayu.Sistema;
-import br.ufal.ic.p2.wepayu.models.Banco;
-import br.ufal.ic.p2.wepayu.models.EmpregadoComissionado;
-import br.ufal.ic.p2.wepayu.models.EmpregadoHorista;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.util.List;
 
 public class InputCheck extends Exception {
 
@@ -341,22 +337,42 @@ public class InputCheck extends Exception {
 
             }
 
-
         }
+
     }
 
+    public static void addNewPayday(String str, List<String> listOfPaydays) throws Exception {
+        for (String payday : listOfPaydays)
+            if (payday.equals(str))
+                throw new Exception("Agenda de pagamentos ja existe");
+        if (!(str.contains("semanal") || str.contains("mensal")))
+            throw new Exception("Descricao de agenda invalida");
+        String[] strSplit = str.split(" ");
+
+        if (strSplit[0].equals("semanal"))
+            if(strSplit.length == 3) {
+                if (Integer.parseInt(strSplit[1]) > 52 || Integer.parseInt(strSplit[1]) < 1)
+                    throw new Exception("Descricao de agenda invalida");
+                else if (Integer.parseInt(strSplit[2]) > 7 || Integer.parseInt(strSplit[2]) < 1)
+                    throw new Exception("Descricao de agenda invalida");
+            }
+            else if(strSplit.length == 2) {
+                if (Integer.parseInt(strSplit[1]) > 7 || Integer.parseInt(strSplit[1]) < 1)
+                    throw new Exception("Descricao de agenda invalida");
+            }
+            else
+                throw new Exception("Descricao de agenda invalida");
+        if (strSplit[0].equals("mensal")) {
+            if(strSplit.length == 2) {
+                if (Integer.parseInt(strSplit[1]) > 28 || Integer.parseInt(strSplit[1]) < 1)
+                    throw new Exception("Descricao de agenda invalida");
+            }
+            else
+                throw new Exception("Descricao de agenda invalida");
+        }
 
 
 
 
-
-
-
-
-
-
-
-
-
-
+    }
 }

@@ -32,6 +32,8 @@ public class EmpregadoHorista extends Empregado  {
         this.salario = salario;
         this.cartao = new ArrayList<>();
         this.acumuladodescontos = 0D;
+        this.agendaPagamento = new AgendaPagamento();
+        this.agendaPagamento.setPeriodoPagamento("semanal 5");
     }
 
     public EmpregadoHorista(String nome, String endereco, Double salario) {
@@ -39,6 +41,8 @@ public class EmpregadoHorista extends Empregado  {
         this.salario = salario;
         this.cartao = new ArrayList<>();
         this.acumuladodescontos = 0D;
+        this.agendaPagamento = new AgendaPagamento();
+        this.agendaPagamento.setPeriodoPagamento("semanal 5");
     }
 
 
@@ -58,7 +62,6 @@ public class EmpregadoHorista extends Empregado  {
         for (CartaoDePonto cartao: this.cartao) {
             clone.cartao.add(cartao.clone());
         }
-        // TODO: copy mutable state here, so the clone can't change the internals of the original
         return clone;
     }
 }

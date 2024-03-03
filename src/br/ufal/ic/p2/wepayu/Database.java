@@ -7,16 +7,24 @@ import java.beans.XMLEncoder;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Database {
     private static Database instance;
     private LinkedHashMap<String, Empregado> empregados;
 
+    public List<String> getListOfPaydays() {
+        return listOfPaydays;
+    }
+
+    private List<String> listOfPaydays;
+
     private Database() throws IOException {
         //empregados = new LinkedHashMap<>();
-        empregados = getFromXML();
+        getFromXML();
     }
 
     public static Database getInstance() throws IOException {
@@ -41,29 +49,43 @@ public class Database {
 
         XMLEncoder e = new XMLEncoder(file);
         e.writeObject(empregados);
+        e.writeObject(listOfPaydays);
         e.close();
     }
 
-    private LinkedHashMap<String, Empregado> getFromXML() {
+    private void getFromXML() {
 
-        BufferedInputStream file;
+        BufferedInputStream file = null;
         try {file = new BufferedInputStream(new FileInputStream("data.xml"));}
         catch (FileNotFoundException e) {
-            return new LinkedHashMap<>();
+            instance.empregados = new LinkedHashMap<>();
+            instance.listOfPaydays = new ArrayList<>();
+            listOfPaydays.add("semanal 5");
+            listOfPaydays.add("semanal 2 5");
+            listOfPaydays.add("mensal $");
         }
 
         XMLDecoder d = new XMLDecoder(file);
 
-        return (LinkedHashMap<String, Empregado>) d.readObject();
+        empregados = (LinkedHashMap<String, Empregado>) d.readObject();
+        try { listOfPaydays = (List<String>) d.readObject();}
+        catch (Exception e) {
+            listOfPaydays = new ArrayList<>();
+            listOfPaydays.add("semanal 5");
+            listOfPaydays.add("semanal 2 5");
+            listOfPaydays.add("mensal $");
+        }
     }
 
     public void clear() {
         empregados.clear();
+        listOfPaydays.clear();
+        listOfPaydays.add("semanal 5");
+        listOfPaydays.add("semanal 2 5");
+        listOfPaydays.add("mensal $");
         try {
             Files.delete(Path.of("data.xml"));
-        }catch (Exception e){
-            System.out.println("Arquivo nao existe");
-        }
+        }catch (Exception ignored) {}
     }
 
     public LinkedHashMap<String, Empregado> getEmpregados() {

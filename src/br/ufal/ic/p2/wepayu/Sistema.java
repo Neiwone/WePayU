@@ -20,6 +20,7 @@ public class Sistema {
     private final Database instance;
     private final History history = new History();
 
+
     public Sistema() throws IOException {
         instance = Database.getInstance();
         history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
@@ -83,6 +84,7 @@ public class Sistema {
             case "contaCorrente"    -> ((Banco) employee.getMetodoPagamento()).getContaCorrente();
             case "idSindicato"      -> employee.getMembroSindicado().getIdMembro();
             case "taxaSindical"     -> String.format("%.2f", employee.getMembroSindicado().getTaxaSindical()).replace(".", ",");
+            case "agendaPagamento"  -> employee.getAgendaPagamento().getPeriodoPagamento();
 
             default -> throw new Exception("Atributo nao existe.");
 
@@ -196,7 +198,7 @@ public class Sistema {
     public void changeAttribute(String employeeID, String attribute, String value) throws Exception {
 
         Empregado employee = instance.getEmpregado(employeeID);
-
+        switchLoop:
         switch (attribute) {
             case "nome" -> {
                 employee.setNome(value);
@@ -229,8 +231,16 @@ public class Sistema {
 
                 employee.setMetodoPagamento(novoMetodo);
             }
-            default -> throw new Exception("Atributo nao existe.");
 
+            case "agendaPagamento" -> {
+                for (String payday : instance.getListOfPaydays())
+                    if (payday.equals(value)) {
+                        employee.getAgendaPagamento().setPeriodoPagamento(value);
+                        break switchLoop;
+                    }
+                throw new Exception("Agenda de pagamento nao esta disponivel");
+            }
+            default -> throw new Exception("Atributo nao existe.");
         }
         history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
     }
@@ -379,15 +389,15 @@ public class Sistema {
 
     public Double getRawSalary(Empregado employee, LocalDate localDate) throws Exception {
         switch (employee.getTipo()) {
-            case "assalariado" -> { return employee.getSalario(); }
+            case "assalariado" -> { return Math.floor(employee.getSalario() * (12D/52D * employee.getAgendaPagamento().getWeeks()) * 100)/100D; }
             case "horista" -> {
-                double workedHours = Double.parseDouble(getWorkedHours(employee.getId(), localDate.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY)), localDate).replace(',', '.'));
-                double extraWorkedHours = Double.parseDouble(getExtraWorkedHours(employee.getId(), localDate.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY)), localDate).replace(',', '.'));
+                double workedHours = Double.parseDouble(getWorkedHours(employee.getId(), employee.getAgendaPagamento().getDaysSinceLastPay(localDate), localDate).replace(',', '.'));
+                double extraWorkedHours = Double.parseDouble(getExtraWorkedHours(employee.getId(), employee.getAgendaPagamento().getDaysSinceLastPay(localDate), localDate).replace(',', '.'));
                 return (workedHours + (extraWorkedHours * 1.5)) * employee.getSalario();
             }
             case "comissionado" -> {
-                double sales = Double.parseDouble(getSales(employee.getId(), localDate.minusDays(13), localDate).replace(',', '.'));
-                return (Math.floor(employee.getSalario() * 24D/52D * 100)/100D + Math.floor((sales * ((EmpregadoComissionado) employee).getComissao()) * 100)/100D);
+                double sales = Double.parseDouble(getSales(employee.getId(), employee.getAgendaPagamento().getDaysSinceLastPay(localDate), localDate).replace(',', '.'));
+                return (Math.floor(employee.getSalario() * 12D/52D * employee.getAgendaPagamento().getWeeks() * 100)/100D + Math.floor((sales * ((EmpregadoComissionado) employee).getComissao()) * 100)/100D);
             }
         }
         return 0.0;
@@ -401,18 +411,11 @@ public class Sistema {
             Empregado employee = employees.getValue();
             switch (employee.getTipo())
             {
-                case "assalariado" -> {
-                    if(localDate == localDate.with(TemporalAdjusters.lastDayOfMonth()))
+                case "assalariado", "horista", "comissionado" -> {
+                    if(employee.getAgendaPagamento().ehDia(localDate))
                         totalToPay += getRawSalary(employee, localDate);
                 }
-                case "horista" -> {
-                    if(localDate.getDayOfWeek().equals(DayOfWeek.FRIDAY))
-                        totalToPay += getRawSalary(employee, localDate);
-                }
-                case "comissionado" -> {
-                    if(((ChronoUnit.DAYS.between(LocalDate.of(2005,1,1), localDate)) + 1) % 14 == 0)
-                        totalToPay += getRawSalary(employee, localDate);
-                }
+                case null, default -> throw new Exception("invalid type trying to generate totalFolha");
             }
         }
         return totalToPay;
@@ -424,7 +427,6 @@ public class Sistema {
         return number == (int) number;
     }
 
-    // Formata o número com ou sem casas decimais
     public static String formatNumber(double number) {
         if (isInteger(number)) {
             // Se for inteiro, formata sem casas decimais
@@ -434,8 +436,6 @@ public class Sistema {
             return new DecimalFormat("#.##").format(number).replace('.',',');
         }
     }
-
-
 
     public void generatePayroll(String date, String file) throws Exception {
         LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("d/M/yyyy"));
@@ -463,7 +463,7 @@ public class Sistema {
         List<Double> totalh = Arrays.asList(0D,0D,0D,0D,0D);
         for(Map.Entry<String, Empregado> employees: sortedEmployees.entrySet()) {
             Empregado employee = employees.getValue();
-            if (employee.getTipo().equals("horista") && localDate.getDayOfWeek().equals(DayOfWeek.FRIDAY)) {
+            if (employee.getTipo().equals("horista") && employee.getAgendaPagamento().ehDia(localDate)) {
                 String nome = employee.getNome();
                 String horastrabalhadas = getWorkedHours(employee.getId(), initialDate, localDate);
                 totalh.set(0, totalh.get(0) + Double.parseDouble(horastrabalhadas.replace(',', '.')));
@@ -619,7 +619,6 @@ public class Sistema {
         history.push(new Memento((LinkedHashMap<String, Empregado>) instance.getEmpregados().clone()));
     }
 
-
     public int getNumberOfEmployees() {
         return instance.getEmpregados().size();
     }
@@ -630,5 +629,13 @@ public class Sistema {
 
     public void redo() throws Exception {
         instance.setData((LinkedHashMap<String, Empregado>) history.redo().restore().clone());
+    }
+
+    public List<String> getListOfPaydays() {
+        return instance.getListOfPaydays();
+    }
+
+    public void addPayday(String str) {
+        instance.getListOfPaydays().add(str);
     }
 }

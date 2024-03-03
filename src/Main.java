@@ -22,10 +22,10 @@ public class Main {
 
         // Second milestone
         EasyAccept.main(new String[]{facade, "tests/us8.txt"});
-//        EasyAccept.main(new String[]{facade, "tests/us9.txt"});
-//        EasyAccept.main(new String[]{facade, "tests/us9_1.txt"});
-//        EasyAccept.main(new String[]{facade, "tests/us10.txt"});
-//        EasyAccept.main(new String[]{facade, "tests/us10_1.txt"});
+        EasyAccept.main(new String[]{facade, "tests/us9.txt"});
+        EasyAccept.main(new String[]{facade, "tests/us9_1.txt"});
+        EasyAccept.main(new String[]{facade, "tests/us10.txt"});
+        EasyAccept.main(new String[]{facade, "tests/us10_1.txt"});
     }
 }
 

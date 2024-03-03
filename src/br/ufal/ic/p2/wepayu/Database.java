@@ -22,7 +22,7 @@ public class Database {
 
     private List<String> listOfPaydays;
 
-    private Database() {
+    private Database() throws IOException {
         getFromXML();
     }
 
@@ -52,11 +52,12 @@ public class Database {
         e.close();
     }
 
-    private void getFromXML() {
+    private void getFromXML() throws IOException {
 
         BufferedInputStream file = null;
         try {file = new BufferedInputStream(new FileInputStream("data.xml"));}
         catch (FileNotFoundException e) {
+            instance = getInstance();
             instance.empregados = new LinkedHashMap<>();
             instance.listOfPaydays = new ArrayList<>();
             listOfPaydays.add("semanal 5");

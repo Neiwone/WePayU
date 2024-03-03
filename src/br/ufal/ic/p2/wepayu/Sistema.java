@@ -198,7 +198,7 @@ public class Sistema {
     public void changeAttribute(String employeeID, String attribute, String value) throws Exception {
 
         Empregado employee = instance.getEmpregado(employeeID);
-        switchLoop:
+
         switch (attribute) {
             case "nome" -> employee.setNome(value);
             case "endereco" -> employee.setEndereco(value);
@@ -232,7 +232,8 @@ public class Sistema {
                 for (String payday : instance.getListOfPaydays())
                     if (payday.equals(value)) {
                         employee.getAgendaPagamento().setPeriodoPagamento(value);
-                        break switchLoop;
+                        history.push(new Memento(instance.getEmpregados()));
+                        return;
                     }
                 throw new Exception("Agenda de pagamento nao esta disponivel");
             }
